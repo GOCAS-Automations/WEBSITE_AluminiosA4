@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" width="120" height="140" role="img" aria-label="Aluminios A4">
+  <defs>
+    <linearGradient id="a4shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4FD6E2"/>
+      <stop offset="1" stop-color="#2BBDCB"/>
+    </linearGradient>
+  </defs>
+  <path d="M24,6 H96 A18,18 0 0 1 114,24 V92 C114,104 108,110 99,116 L66,137 C62,139.5 58,139.5 54,137 L21,116 C12,110 6,104 6,92 V24 A18,18 0 0 1 24,6 Z"
+        fill="url(#a4shield)" stroke="#FFFFFF" stroke-width="5"/>
+  <g fill="none" stroke="#EAFBFD" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M60,33 L39,97"/>
+    <path d="M60,33 L81,97"/>
+    <path d="M45,79 L75,79"/>
+  </g>
+</svg>
