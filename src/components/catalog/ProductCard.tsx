@@ -58,7 +58,9 @@ export default function ProductCard({ producto }: { producto: ProductoConColores
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={producto.qr_url} alt={`QR ${producto.nombre}`} className="h-32 w-32 object-contain" />
-            <span className="text-xs font-medium text-slate-500">Escanea para ver el producto</span>
+            <span className="text-xs font-medium text-slate-500">
+              Escanea y realiza tu pedido en el sistema de Aluminios A4
+            </span>
           </button>
         )}
       </div>
@@ -127,6 +129,12 @@ export default function ProductCard({ producto }: { producto: ProductoConColores
               <path d="M3 8v8l9 5 9-5V8M12 13v8" />
             </svg>
             Empaque: <span className="font-semibold text-slate-600">{producto.empaque}</span>
+          </p>
+        )}
+
+        {producto.colores_manija && (
+          <p className="mt-1.5 text-xs text-slate-500">
+            Manija: <span className="font-semibold text-slate-600">{producto.colores_manija}</span>
           </p>
         )}
 

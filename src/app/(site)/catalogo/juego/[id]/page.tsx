@@ -105,7 +105,9 @@ export default async function JuegoDetalle({
               <img src={j.qr_url} alt={`QR ${j.nombre}`} className="h-24 w-24 object-contain" />
               <div>
                 <p className="font-semibold text-navy">Código QR del juego</p>
-                <p className="text-sm text-slate-500">Escanéalo para acceder a esta ficha.</p>
+                <p className="text-sm text-slate-500">
+                  Escanéalo para realizar el pedido de este juego en el sistema de Aluminios A4.
+                </p>
               </div>
             </div>
           )}

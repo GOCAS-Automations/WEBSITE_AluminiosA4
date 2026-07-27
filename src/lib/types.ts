@@ -31,6 +31,7 @@ export interface Producto {
   diametro_cm: number | null;
   altura_cm: number | null;
   capacidad: string | null;
+  colores_manija: string | null;
   refuerzo: boolean;
   empaque: string | null;
   precio: number;

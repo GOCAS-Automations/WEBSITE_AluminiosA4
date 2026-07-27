@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/format";
+import { Logo } from "@/components/Logo";
 
 /** Muestra una imagen de producto con fondo suave y placeholder si falla. */
 export default function ImageBox({
@@ -35,13 +36,9 @@ export default function ImageBox({
           loading="lazy"
         />
       ) : (
-        <div className="flex flex-col items-center gap-2 text-brand-300">
-          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M4 9h16l-1 10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 9Z" />
-            <path d="M8 9V7a4 4 0 0 1 8 0v2" />
-            <path d="M3 9h18" />
-          </svg>
-          <span className="text-xs font-medium text-slate-400">Imagen pendiente</span>
+        <div className="flex flex-col items-center justify-center gap-2 p-4">
+          <Logo showText={false} size={56} className="opacity-35 saturate-50" />
+          <span className="text-xs font-medium text-slate-400">Imagen próximamente</span>
         </div>
       )}
     </div>

@@ -34,6 +34,7 @@ export default async function ProductoDetalle({
   if (d) specs.push({ label: "Diámetro", value: d });
   if (a) specs.push({ label: "Altura", value: a });
   if (p.capacidad) specs.push({ label: "Capacidad", value: p.capacidad });
+  if (p.colores_manija) specs.push({ label: "Colores de manija", value: p.colores_manija });
   specs.push({ label: "Refuerzo", value: p.refuerzo ? "Sí" : "No" });
   if (p.empaque) specs.push({ label: "Empaque (caja)", value: p.empaque });
   if (p.referencia) specs.push({ label: "Referencia", value: p.referencia });
@@ -85,7 +86,7 @@ export default async function ProductoDetalle({
               <div>
                 <p className="font-semibold text-navy">Código QR del producto</p>
                 <p className="text-sm text-slate-500">
-                  Escanéalo para acceder rápidamente a esta ficha.
+                  Escanéalo para realizar el pedido de esta referencia en el sistema de Aluminios A4.
                 </p>
               </div>
             </div>

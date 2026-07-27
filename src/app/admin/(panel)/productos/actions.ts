@@ -19,6 +19,7 @@ export async function saveProducto(formData: FormData) {
     diametro_cm: toNum(formData.get("diametro_cm")),
     altura_cm: toNum(formData.get("altura_cm")),
     capacidad: strOrNull(formData.get("capacidad")),
+    colores_manija: strOrNull(formData.get("colores_manija")),
     refuerzo: boolFrom(formData.get("refuerzo")),
     empaque: strOrNull(formData.get("empaque")),
     precio: toNum(formData.get("precio")) ?? 0,

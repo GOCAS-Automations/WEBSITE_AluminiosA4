@@ -99,6 +99,9 @@ export default function ProductoForm({
               <Input name="empaque" defaultValue={producto?.empaque ?? ""} placeholder="Caja x 12" />
             </Field>
           </div>
+          <Field label="Colores de manija" hint="Ej: Negra, Roja, Azul">
+            <Input name="colores_manija" defaultValue={producto?.colores_manija ?? ""} placeholder="Negra" />
+          </Field>
           <Toggle name="refuerzo" label="Con refuerzo" defaultChecked={producto?.refuerzo ?? false} />
         </Section>
 

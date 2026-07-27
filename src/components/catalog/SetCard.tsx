@@ -48,7 +48,9 @@ export default function SetCard({ juego }: { juego: JuegoConDetalle }) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={juego.qr_url} alt={`QR ${juego.nombre}`} className="h-32 w-32 object-contain" />
-            <span className="text-xs font-medium text-slate-500">Escanea para ver el juego</span>
+            <span className="text-xs font-medium text-slate-500">
+              Escanea y realiza tu pedido en el sistema de Aluminios A4
+            </span>
           </button>
         )}
       </div>
