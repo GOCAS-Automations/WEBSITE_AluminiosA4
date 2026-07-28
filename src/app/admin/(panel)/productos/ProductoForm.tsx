@@ -91,9 +91,12 @@ export default function ProductoForm({
         </Section>
 
         <Section title="Precio y empaque">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <Field label="Precio (COP)">
               <Input name="precio" type="number" step="1" min="0" required defaultValue={producto?.precio ?? ""} placeholder="16500" />
+            </Field>
+            <Field label="Precio empaque (COP)">
+              <Input name="precio_empaque" type="number" step="1" min="0" defaultValue={producto?.precio_empaque ?? ""} placeholder="162000" />
             </Field>
             <Field label="Empaque (nota de caja)" hint="Ej: Caja x 12, Caja 20…">
               <Input name="empaque" defaultValue={producto?.empaque ?? ""} placeholder="Caja x 12" />

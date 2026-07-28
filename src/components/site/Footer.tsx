@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import { waLink, WA_MSG_GENERAL } from "@/lib/whatsapp";
 
 export default function Footer() {
   return (
@@ -42,8 +43,18 @@ export default function Footer() {
               </a>
             </li>
             <li>
-              <a href="tel:+57" className="hover:text-brand-300">
-                +57 (teléfono por definir)
+              <a href="tel:+573508228479" className="hover:text-brand-300">
+                +57 350 822 8479
+              </a>
+            </li>
+            <li>
+              <a
+                href={waLink(WA_MSG_GENERAL)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-brand-300"
+              >
+                WhatsApp: 350 822 8479
               </a>
             </li>
           </ul>

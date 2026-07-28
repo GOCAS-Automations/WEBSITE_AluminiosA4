@@ -7,42 +7,54 @@ Guía de orientación para sesiones de Claude Code en este repositorio. Léela a
 Sitio web + catálogo público + panel de administración para **Aluminios A4**, fabricante de ollas,
 calderos y utensilios de aluminio en Cali, Colombia.
 
-- **Sitio público**: landing de marca, catálogo por **categorías** → **productos individuales** o
-  **juegos de ollas**, tarjetas con cambio de color de tapa, medidas/empaque/precio y QR de pedido,
-  sección de ubicación con mapa.
+- **Sitio público**: landing de marca (**sin precios** en la sección de destacados — decisión del
+  cliente; el catálogo y las fichas sí muestran precio), catálogo por **categorías** →
+  **productos individuales** o **juegos de ollas** (pestañas), tarjetas con cambio de color de
+  tapa, medidas/empaque/precio (+ precio de empaque) y QR de pedido, botón de **WhatsApp** por
+  referencia y flotante global, botón **"Descargar catálogo PDF"** por categoría (generado en
+  vivo), sección de ubicación con mapa.
 - **Panel admin** (`/admin`): login propio (usuario + contraseña), CRUD de productos, juegos,
   categorías y usuarios, subida de imágenes a Supabase Storage o por URL externa (Cloudinary
   compatible). Roles `administrador` y `coordinador`.
+
+Catálogo real cargado: **124 productos individuales + 19 juegos**, en 6 categorías (Pailas 36,
+Ollas 23, Calderos 22, Complementos 15, Jarras y Jarros 14, Chocolateras 14; juegos: Ollas 9,
+Calderos 7, Pailas 3). Ver `docs/NOTAS_IMPORTANTES.md` para inconsistencias del Excel de origen
+(artículos excluidos, referencias sin QR, QRs sin referencia, erratas de medidas, etc.).
 
 ## Stack
 
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · Supabase (Postgres + Storage).
 
-Proyecto Supabase: id `hqsgmmpwfhesiqnnogib`. Bucket público de imágenes: `catalogo`.
+Proyecto Supabase: id `bapzisncyjsxaugdsmxl` (cuenta **GOCAS**). Bucket público de imágenes:
+`catalogo`.
 
 ## Mapa de estructura (`src/`)
 
 ```
 src/app/
   (site)/                     # grupo de rutas del sitio público
-    page.tsx                  # home
+    page.tsx                  # home (destacados SIN precio — showPrice={false})
     catalogo/page.tsx         # listado de categorías
-    catalogo/[slug]/page.tsx  # productos + juegos de una categoría
+    catalogo/[slug]/page.tsx  # productos + juegos de una categoría, tabs individuales/juegos,
+                               # botón "Descargar catálogo PDF"
     catalogo/producto/[id]/page.tsx
     catalogo/juego/[id]/page.tsx
-    layout.tsx                # Header + Footer del sitio
+    layout.tsx                # Header + Footer + WhatsAppFloat del sitio
   admin/
     login/page.tsx
     actions.ts                # server action login()/logout()
     layout.tsx                # valida sesión vía middleware, no vía este layout
     (panel)/                  # rutas protegidas: dashboard, productos, juegos, categorías, usuarios
       productos/ juegos/ categorias/ usuarios/   # cada una: page.tsx (lista), nuevo/, [id]/, actions.ts, *Form.tsx
-  api/upload/route.ts          # sube archivo a Supabase Storage (requiere sesión)
+  api/
+    upload/route.ts               # sube archivo a Supabase Storage (requiere sesión, límite 10 MB)
+    catalogo/[slug]/pdf/route.tsx # genera EN VIVO el PDF de catálogo de una categoría (@react-pdf/renderer)
   middleware.ts                # protege /admin, restringe /admin/usuarios a administrador
 
 src/components/
   Logo.tsx
-  site/          Header.tsx, Footer.tsx
+  site/          Header.tsx, Footer.tsx, WhatsAppFloat.tsx (botón flotante global)
   catalog/       ProductCard.tsx, SetCard.tsx, ImageBox.tsx (placeholder), ColorViewer.tsx
   admin/         AdminShell.tsx, FormBits.tsx, SubmitButton.tsx, ImageField.tsx,
                  ColoresEditor.tsx (colores de tapa por producto/juego),
@@ -56,12 +68,24 @@ src/lib/
   auth.ts        # getSession/requireSession/requireAdmin, hash/verify de contraseñas (bcryptjs)
   session.ts     # firma/verifica el JWT de sesión (jose, HS256)
   upload-client.ts # uploadImage() del lado del cliente hacia /api/upload
+  whatsapp.ts    # WHATSAPP_PHONE, waLink(mensaje), WA_MSG_GENERAL — usado por WhatsAppFloat,
+                 # ProductCard/SetCard y las fichas de producto/juego
+  pdf/CatalogoPDF.tsx # documento @react-pdf/renderer del catálogo por categoría (usado por la route de arriba)
   types.ts       # tipos de dominio (Categoria, Producto, Juego, Usuario, etc.)
   format.ts      # formatCOP, cm, slugify, cn
 
-scripts/
-  upload-seed.mjs  # sube imágenes de una carpeta local al bucket "catalogo"
-  test-admin.mjs   # smoke test de la capa admin (service key, login, insert+delete)
+scripts/  (correr con: node --env-file=.env.local scripts/<nombre>.mjs, desde web/)
+  apply-schema.mjs     # aplica scripts/schema-gocas.sql sobre Supabase vía SUPABASE_DB_URL (migraciones)
+  seed-usuarios.mjs    # crea/actualiza admin/coordinador
+  load-referencias.mjs # carga el catálogo real (CSV v2); soporta --dry
+  upload-seed.mjs [carpeta]  # sube imágenes de una carpeta local al bucket "catalogo"
+  assign-qrs.mjs       # asigna a cada producto/juego su QR ya subido, según `referencia`
+  test-admin.mjs       # smoke test de la capa admin (service key, login, insert+delete)
+  test-pdf.mts         # smoke test del PDF con datos mock (correr con `npx tsx scripts/test-pdf.mts`)
+
+docs/
+  MANUAL_SITIO_WEB.md      # manual de uso (sitio público + panel) para entregar al cliente
+  NOTAS_IMPORTANTES.md     # inconsistencias/notas de la carga real del catálogo, para el cliente
 ```
 
 No existe carpeta `src/app/(site)/admin` — la ruta admin vive en `src/app/admin`, separada del
@@ -76,8 +100,13 @@ npm run start           # sirve el build
 npm run lint            # eslint
 
 # scripts puntuales (requieren variables de entorno; usar --env-file para cargarlas)
+node --env-file=.env.local scripts/apply-schema.mjs
+node --env-file=.env.local scripts/seed-usuarios.mjs
+node --env-file=.env.local scripts/load-referencias.mjs --dry
 node --env-file=.env.local scripts/test-admin.mjs
 node scripts/upload-seed.mjs [carpeta-origen]
+node --env-file=.env.local scripts/assign-qrs.mjs [carpeta-qr]
+npx tsx scripts/test-pdf.mts
 ```
 
 Convención general para scripts ad-hoc de datos (carga/migración/asignación de QR, etc.):
@@ -91,7 +120,9 @@ Tablas en Postgres (Supabase):
   Calderos, Pailas, Jarras y Jarros, Chocolateras, Complementos.
 - **productos** — ficha de un producto individual: referencia, medidas (`diametro_cm`,
   `altura_cm`), `capacidad`, **`colores_manija`** (texto, colores disponibles de la manija),
-  `refuerzo` (bool), `empaque`, `precio`, `imagen_url`, `qr_url`, `destacado`, `activo`, `orden`.
+  `refuerzo` (bool), `empaque`, `precio` (por unidad), **`precio_empaque`** (precio del empaque/caja
+  completo, opcional — se muestra en tarjeta/ficha/PDF solo si difiere de `precio`), `imagen_url`,
+  `qr_url`, `destacado`, `activo`, `orden`.
 - **producto_colores** — colores de **tapa** de un producto, cada uno con nombre, `hex` e
   `imagen_url` opcional (la foto puede cambiar según el color de tapa elegido).
 - **juegos** — igual que productos pero para un juego/set de ollas (sin `colores_manija`,
@@ -102,13 +133,21 @@ Tablas en Postgres (Supabase):
 - **usuarios** — login propio: `usuario`, `password_hash` (bcrypt), `nombre`, `email`, `rol`
   (`administrador` | `coordinador`), `activo`, `last_login`.
 
-Los datos reales (~134 referencias) se cargaron desde `insumos/referencias_aluminiosA4.csv`
-(carpeta hermana de `web/`, fuera del repo del sitio) mediante un script de carga puntual
-(`scripts/load-referencias.mjs`); los QR por referencia se extrajeron de `insumos/QRs A4.pdf` y
-se subieron al bucket `catalogo`, carpeta `qr/`, con un script de asignación
-(`scripts/assign-qrs.mjs`). Estos dos scripts fueron procesos de una sola vez sobre la base de
-datos: si no están presentes en `scripts/` al leer esto, ya cumplieron su función (los datos y QR
-ya están en Supabase) y solo habría que recrearlos si se necesita repetir una carga masiva.
+Los datos reales (**124 productos + 19 juegos**, CSV v2) se cargaron desde
+`insumos/REFERENCIAS ARTICULOS EXCEL ACTUALIZADO v2.csv` (carpeta hermana de `web/`, fuera del
+repo del sitio) mediante `scripts/load-referencias.mjs`; los QR por referencia se extrajeron de
+`insumos/QRs A4.pdf` y se subieron al bucket `catalogo`, carpeta `qr/`, con
+`scripts/assign-qrs.mjs`. Ver `docs/NOTAS_IMPORTANTES.md` para el detalle completo de
+inconsistencias detectadas al cargar (artículos sin código, referencias sin QR, QRs sin
+referencia todavía, posibles erratas de medidas, etc.) — es el documento de referencia para no
+repetir ese análisis. Estos dos scripts se pueden volver a correr si llega una nueva versión del
+Excel (por ejemplo, `load-referencias.mjs` vincula automáticamente productos y juegos por
+`referencia`, así que si vuelven filas retiradas —como las Ollas Premium individuales— quedan
+enlazadas solas).
+
+**Nota interna**: los archivos `caldero-24-*.png` del bucket `catalogo` contienen en realidad la
+foto de la **Olla Especial Aro #14** (A4-155) — el nombre del archivo es histórico (de una carga
+de muestra anterior); la asignación en la base de datos es correcta, no es un bug.
 
 ## Autenticación y roles
 
@@ -138,6 +177,15 @@ escaneándolo, el cliente/vendedor **realiza el pedido de esa referencia en el s
 Aluminios A4** — no es un enlace a la ficha del producto ni a una tienda externa. Ver el texto
 exacto en `src/app/(site)/catalogo/producto/[id]/page.tsx` y `ProductCard.tsx`.
 
+## WhatsApp
+
+`src/lib/whatsapp.ts` centraliza el número (`WHATSAPP_PHONE = "573508228479"`) y el helper
+`waLink(mensaje)` que arma el enlace `wa.me` con el mensaje codificado. Se usa en:
+`WhatsAppFloat.tsx` (botón flotante global, mensaje `WA_MSG_GENERAL`), `ProductCard.tsx` /
+`SetCard.tsx` (botón por tarjeta) y las fichas de producto/juego (botón de ancho completo), cada
+uno armando un mensaje que incluye la referencia y el nombre. Para cambiar el número, editar solo
+`WHATSAPP_PHONE` en ese archivo.
+
 ## Variables de entorno
 
 Copiar `.env.example` a `.env.local` y completar (nunca commitear `.env.local`):
@@ -150,6 +198,7 @@ Copiar `.env.example` a `.env.local` y completar (nunca commitear `.env.local`):
 | `SUPABASE_SERVICE_ROLE_KEY` | **Secreta.** Solo servidor: login, CRUD, subida de imágenes |
 | `SESSION_SECRET` | Firma la cookie JWT de sesión |
 | `NEXT_PUBLIC_SITE_URL` | URL pública del sitio (enlaces/QR) |
+| `SUPABASE_DB_URL` | **Secreta.** Solo usada por `scripts/apply-schema.mjs` (conexión directa/session pooler de Postgres para migraciones de esquema). La app en runtime **no** la lee — no hace falta en Vercel. |
 
 ## Despliegue
 

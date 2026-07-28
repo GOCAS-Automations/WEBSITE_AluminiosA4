@@ -4,9 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import type { JuegoConDetalle } from "@/lib/types";
 import { formatCOP, cn } from "@/lib/format";
+import { waLink } from "@/lib/whatsapp";
 import ImageBox from "./ImageBox";
 
-export default function SetCard({ juego }: { juego: JuegoConDetalle }) {
+export default function SetCard({
+  juego,
+  showPrice = true,
+}: {
+  juego: JuegoConDetalle;
+  showPrice?: boolean;
+}) {
   const colores = juego.colores ?? [];
   const [idx, setIdx] = useState(0);
   const [qrOpen, setQrOpen] = useState(false);
@@ -115,17 +122,39 @@ export default function SetCard({ juego }: { juego: JuegoConDetalle }) {
           </p>
         )}
 
-        <div className="mt-4 flex items-end justify-between border-t border-slate-100 pt-3">
-          <div>
-            <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">Precio del juego</p>
-            <p className="text-xl font-extrabold text-brand-700">{formatCOP(juego.precio)}</p>
+        <div
+          className={cn(
+            "mt-4 flex items-end border-t border-slate-100 pt-3",
+            showPrice !== false ? "justify-between" : "justify-end"
+          )}
+        >
+          {showPrice !== false && (
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">Precio del juego</p>
+              <p className="text-xl font-extrabold text-brand-700">{formatCOP(juego.precio)}</p>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <a
+              href={waLink(
+                `Hola, Aluminios A4 👋. Quisiera información sobre el juego ${juego.referencia ?? ""} — ${juego.nombre}.`
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Consultar por WhatsApp"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 transition-colors hover:border-[#25D366]"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true">
+                <path d="M12.04 2c-5.52 0-10 4.48-10 10 0 1.76.46 3.48 1.34 5L2 22l5.14-1.35a10 10 0 0 0 4.9 1.25h.01c5.52 0 10-4.48 10-10S17.56 2 12.04 2Zm5.85 14.24c-.25.7-1.23 1.28-2.02 1.45-.55.11-1.26.2-3.66-.79-2.66-1.1-4.5-3.7-4.63-3.87-.13-.17-1.1-1.47-1.1-2.8s.68-1.98.93-2.25c.24-.27.53-.34.71-.34.18 0 .35 0 .5.01.16.01.38-.06.6.46.24.57.81 1.98.88 2.13.07.14.11.31.02.5-.09.19-.14.31-.28.48-.14.16-.29.36-.42.49-.14.14-.28.29-.12.57.16.27.71 1.17 1.53 1.89 1.05.94 1.94 1.23 2.21 1.37.27.14.43.12.59-.05.16-.18.68-.79.87-1.06.18-.27.36-.22.6-.13.24.09 1.53.72 1.79.85.27.14.44.2.5.31.07.13.07.7-.18 1.39Z" />
+              </svg>
+            </a>
+            <Link
+              href={`/catalogo/juego/${juego.id}`}
+              className="rounded-lg bg-navy px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-700"
+            >
+              Ver detalle
+            </Link>
           </div>
-          <Link
-            href={`/catalogo/juego/${juego.id}`}
-            className="rounded-lg bg-navy px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-700"
-          >
-            Ver detalle
-          </Link>
         </div>
       </div>
     </article>

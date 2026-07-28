@@ -23,6 +23,7 @@ export async function saveProducto(formData: FormData) {
     refuerzo: boolFrom(formData.get("refuerzo")),
     empaque: strOrNull(formData.get("empaque")),
     precio: toNum(formData.get("precio")) ?? 0,
+    precio_empaque: toNum(formData.get("precio_empaque")),
     imagen_url: strOrNull(formData.get("imagen_url")),
     qr_url: strOrNull(formData.get("qr_url")),
     destacado: boolFrom(formData.get("destacado")),

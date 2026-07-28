@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   description:
     "Fabricantes de ollas, calderos y utensilios en aluminio de alta calidad. Hecho en Colombia. Conoce nuestro catálogo de ollas individuales y juegos.",
-  icons: { icon: "/logo-a4.svg" },
+  icons: { icon: "/favicon.png" },
 };
 
 export default function RootLayout({

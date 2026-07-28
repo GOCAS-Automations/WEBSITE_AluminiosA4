@@ -128,8 +128,8 @@ export default async function LandingPage() {
             <h2 className="text-2xl font-extrabold text-navy sm:text-3xl">Productos destacados</h2>
             <p className="mt-1 text-slate-500">Una muestra de lo que fabricamos.</p>
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {juegos.map((j) => <SetCard key={j.id} juego={j} />)}
-              {productos.map((p) => <ProductCard key={p.id} producto={p} />)}
+              {juegos.map((j) => <SetCard key={j.id} juego={j} showPrice={false} />)}
+              {productos.map((p) => <ProductCard key={p.id} producto={p} showPrice={false} />)}
             </div>
           </div>
         </section>

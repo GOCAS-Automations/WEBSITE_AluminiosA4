@@ -56,8 +56,37 @@ export default async function CategoriaPage({
         <span className="font-medium text-slate-600">{cat.nombre}</span>
       </nav>
 
-      <h1 className="text-3xl font-extrabold text-navy">{cat.nombre}</h1>
-      {cat.descripcion && <p className="mt-2 max-w-2xl text-slate-500">{cat.descripcion}</p>}
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
+        <div>
+          <h1 className="text-3xl font-extrabold text-navy">{cat.nombre}</h1>
+          {cat.descripcion && (
+            <p className="mt-2 max-w-2xl text-slate-500">{cat.descripcion}</p>
+          )}
+        </div>
+
+        <a
+          href={`/api/catalogo/${cat.slug}/pdf`}
+          download
+          className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 3v12" />
+            <path d="m7 10 5 5 5-5" />
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          </svg>
+          Descargar catálogo PDF
+        </a>
+      </div>
 
       {/* Selector individuales / juegos */}
       <div className="mt-8 inline-flex rounded-xl bg-slate-100 p-1">

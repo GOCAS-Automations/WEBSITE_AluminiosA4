@@ -22,6 +22,7 @@ function normProducto(row: any): ProductoConColores {
   return {
     ...row,
     precio: num(row.precio),
+    precio_empaque: maybeNum(row.precio_empaque),
     diametro_cm: maybeNum(row.diametro_cm),
     altura_cm: maybeNum(row.altura_cm),
     colores,

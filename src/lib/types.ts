@@ -35,6 +35,7 @@ export interface Producto {
   refuerzo: boolean;
   empaque: string | null;
   precio: number;
+  precio_empaque: number | null;
   imagen_url: string | null;
   qr_url: string | null;
   destacado: boolean;
