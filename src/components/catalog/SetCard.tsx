@@ -21,6 +21,11 @@ export default function SetCard({
   const activeColor = colores[idx];
   const img = activeColor?.imagen_url || juego.imagen_url || null;
   const piezas = juego.componentes?.reduce((n, c) => n + (c.cantidad ?? 1), 0) ?? 0;
+  const piezasNombre = (() => {
+    const m = juego.nombre?.match(/[x*](\d+)/i);
+    return m ? parseInt(m[1], 10) : 0;
+  })();
+  const piezasFinal = piezas || piezasNombre;
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm ring-1 ring-brand-50 transition-all hover:-translate-y-0.5 hover:shadow-lg">
@@ -28,7 +33,7 @@ export default function SetCard({
         <ImageBox src={img} alt={juego.nombre} className="aspect-[4/3] w-full" />
 
         <span className="absolute left-3 top-3 rounded-full bg-brand-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
-          Juego · {piezas || juego.componentes.length} piezas
+          {piezasFinal > 0 ? `Juego · ${piezasFinal} piezas` : "Juego"}
         </span>
 
         {juego.qr_url && (
@@ -56,7 +61,7 @@ export default function SetCard({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={juego.qr_url} alt={`QR ${juego.nombre}`} className="h-32 w-32 object-contain" />
             <span className="text-xs font-medium text-slate-500">
-              Escanea y realiza tu pedido en el sistema de Aluminios A4
+              Escanéalo con POSGOLD y realiza tu pedido en el sistema de Aluminios A4
             </span>
           </button>
         )}
@@ -124,7 +129,7 @@ export default function SetCard({
 
         <div
           className={cn(
-            "mt-4 flex items-end border-t border-slate-100 pt-3",
+            "mt-auto flex items-end border-t border-slate-100 pt-3",
             showPrice !== false ? "justify-between" : "justify-end"
           )}
         >

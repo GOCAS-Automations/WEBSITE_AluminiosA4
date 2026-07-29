@@ -30,7 +30,7 @@ const EMPRESA =
   "Aluminios A4 · 100% Aluminio de Calidad · Cl. 36 #4-19, Comuna 4, Cali · +57 350 822 8479";
 
 const NOTA_QR =
-  "Escanea el código QR de cada referencia para realizar tu pedido en el sistema de Aluminios A4.";
+  "Escanea el código QR de cada referencia con POSGOLD para realizar tu pedido en el sistema de Aluminios A4.";
 
 /* ------------------------------------------------------------------ *
  * Tipos de props (estructurales: aceptan ProductoConColores / JuegoConDetalle)
@@ -53,6 +53,7 @@ export interface PDFProducto {
   precio: number;
   precio_empaque?: number | null;
   qr_url?: string | null;
+  imagen_url?: string | null;
   colores?: PDFColor[];
 }
 
@@ -65,6 +66,7 @@ export interface PDFJuego {
   precio: number;
   precio_empaque?: number | null;
   qr_url?: string | null;
+  imagen_url?: string | null;
   colores?: PDFColor[];
   componentes?: { producto: { nombre: string }; cantidad: number }[];
 }
@@ -87,6 +89,11 @@ export interface CatalogoPDFProps {
    * Si NO se entrega, se usa la URL remota directamente.
    */
   qrImages?: Record<string, PDFImagen | null>;
+  /**
+   * Mapa imagen_url -> foto de artículo ya descargada. Mismo criterio que
+   * qrImages: si falta o la descarga falló, la celda muestra "Foto pendiente".
+   */
+  productoImages?: Record<string, PDFImagen | null>;
 }
 
 /* ------------------------------------------------------------------ *
@@ -187,12 +194,13 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.borde,
     borderRadius: 8,
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
   },
   celdaVacia: { width: "49%" },
 
   celdaTop: { flexDirection: "row", alignItems: "flex-start" },
-  celdaInfo: { flex: 1, paddingRight: 7 },
+  celdaInfo: { flex: 1, paddingHorizontal: 6 },
   nombre: {
     fontFamily: "Helvetica-Bold",
     fontSize: 10.5,
@@ -228,6 +236,26 @@ const s = StyleSheet.create({
     justifyContent: "center",
   },
   qrVacioTexto: { fontSize: 6, color: C.gris, textAlign: "center" },
+
+  foto: {
+    width: 54,
+    height: 54,
+    objectFit: "contain",
+    borderWidth: 1,
+    borderColor: C.bordeSuave,
+    borderRadius: 6,
+  },
+  fotoVacia: {
+    width: 54,
+    height: 54,
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  fotoVaciaTexto: { fontSize: 6.5, color: C.gris, textAlign: "center" },
 
   specs: { fontSize: 8, color: C.gris, marginTop: 7 },
 
@@ -358,6 +386,30 @@ function QR({
   return <Image style={s.qr} src={url} />;
 }
 
+function Foto({
+  url,
+  productoImages,
+}: {
+  url?: string | null;
+  productoImages?: Record<string, PDFImagen | null>;
+}) {
+  const pendiente = (
+    <View style={s.fotoVacia}>
+      <Text style={s.fotoVaciaTexto}>Foto{"\n"}pendiente</Text>
+    </View>
+  );
+
+  if (!url) return pendiente;
+
+  if (productoImages) {
+    const img = productoImages[url];
+    if (!img) return pendiente;
+    return <Image style={s.foto} src={{ data: img.data, format: img.format }} />;
+  }
+
+  return <Image style={s.foto} src={url} />;
+}
+
 function Colores({ colores }: { colores?: PDFColor[] }) {
   const list = (colores ?? []).filter((c) => c && c.nombre);
   if (!list.length) return null;
@@ -386,10 +438,12 @@ function Celda({
   item,
   tipo,
   qrImages,
+  productoImages,
 }: {
   item: PDFProducto | PDFJuego;
   tipo: "producto" | "juego";
   qrImages?: Record<string, PDFImagen | null>;
+  productoImages?: Record<string, PDFImagen | null>;
 }) {
   const esJuego = tipo === "juego";
   const producto = item as PDFProducto;
@@ -407,6 +461,7 @@ function Celda({
   return (
     <View style={s.celda}>
       <View style={s.celdaTop}>
+        <Foto url={item.imagen_url} productoImages={productoImages} />
         <View style={s.celdaInfo}>
           <Text style={s.nombre}>{item.nombre}</Text>
           {!!item.referencia && (
@@ -469,10 +524,12 @@ function Cuadricula({
   items,
   tipo,
   qrImages,
+  productoImages,
 }: {
   items: (PDFProducto | PDFJuego)[];
   tipo: "producto" | "juego";
   qrImages?: Record<string, PDFImagen | null>;
+  productoImages?: Record<string, PDFImagen | null>;
 }) {
   return (
     <>
@@ -484,6 +541,7 @@ function Cuadricula({
               item={item}
               tipo={tipo}
               qrImages={qrImages}
+              productoImages={productoImages}
             />
           ))}
           {fila.length === 1 && <View style={s.celdaVacia} />}
@@ -513,6 +571,7 @@ export default function CatalogoPDF({
   fecha,
   logo,
   qrImages,
+  productoImages,
 }: CatalogoPDFProps) {
   const hayProductos = productos.length > 0;
   const hayJuegos = juegos.length > 0;
@@ -578,6 +637,7 @@ export default function CatalogoPDF({
                     items={productos}
                     tipo="producto"
                     qrImages={qrImages}
+                    productoImages={productoImages}
                   />
                 </>
               )}
@@ -585,7 +645,12 @@ export default function CatalogoPDF({
               {hayJuegos && (
                 <>
                   <TituloSeccion texto="Juegos" conteo={juegos.length} />
-                  <Cuadricula items={juegos} tipo="juego" qrImages={qrImages} />
+                  <Cuadricula
+                    items={juegos}
+                    tipo="juego"
+                    qrImages={qrImages}
+                    productoImages={productoImages}
+                  />
                 </>
               )}
             </>

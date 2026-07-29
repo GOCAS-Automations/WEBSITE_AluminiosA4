@@ -60,8 +60,9 @@ Cada tarjeta de una olla individual muestra:
   espacio vacío o una imagen rota.
 - Una etiqueta **"Con refuerzo"** si el producto la tiene.
 - Un botón **QR** (esquina superior derecha de la foto). Al pulsarlo se abre el código QR en
-  grande sobre la misma tarjeta, junto con el texto **"Escanea y realiza tu pedido en el sistema
-  de Aluminios A4"** — este es el significado del QR en todo el sitio (ver punto 6 más abajo).
+  grande sobre la misma tarjeta, junto con el texto **"Escanéalo con POSGOLD y realiza tu pedido
+  en el sistema de Aluminios A4"** — este es el significado del QR en todo el sitio (ver punto 6
+  más abajo).
 - **Selector de color de tapa**: círculos de color que se pueden pulsar; si ese color tiene su
   propia foto cargada, la imagen de la tarjeta cambia a esa foto.
 - **Medidas**: diámetro, altura y/o capacidad (los que apliquen al producto).
@@ -91,8 +92,8 @@ Al pulsar "Ver detalle" en una olla se abre su ficha completa, con:
 - **Precio por unidad** destacado.
 - Una lista de datos: diámetro, altura, capacidad, colores de manija, si tiene refuerzo, nota de
   empaque, precio de empaque (si aplica) y la referencia (código A4).
-- Si el producto tiene QR asignado: el código QR ampliado junto con la explicación de que sirve
-  para realizar el pedido en el sistema de Aluminios A4.
+- Si el producto tiene QR asignado: el código QR ampliado junto con la explicación de que se
+  escanea con **POSGOLD** para realizar el pedido en el sistema de Aluminios A4.
 - Un botón grande de **"Consultar esta referencia por WhatsApp"**.
 - Enlace para volver al catálogo.
 
@@ -105,8 +106,8 @@ con enlace a la ficha de esa olla específica.
 ### 7. Cómo funciona el QR (importante)
 
 En todo el sitio (tarjetas, fichas y catálogo en PDF) el código QR **no** es un enlace a la ficha
-del producto ni a una tienda en línea: al escanearlo desde el celular, permite **realizar el
-pedido de esa referencia directamente en el sistema interno de Aluminios A4**. Es la misma
+del producto ni a una tienda en línea: se **escanea con el sistema POSGOLD**, y eso permite
+**realizar el pedido de esa referencia directamente en el sistema de Aluminios A4**. Es la misma
 explicación en todos los lugares donde aparece el QR.
 
 ### 8. Botón "Descargar catálogo PDF"

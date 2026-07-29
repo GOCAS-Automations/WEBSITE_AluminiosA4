@@ -29,6 +29,11 @@ export default async function JuegoDetalle({
 
   const cat = (j as { categoria?: { nombre: string; slug: string } | null }).categoria ?? null;
   const piezas = j.componentes.reduce((n, c) => n + (c.cantidad ?? 1), 0);
+  const piezasNombre = (() => {
+    const m = j.nombre?.match(/[x*](\d+)/i);
+    return m ? parseInt(m[1], 10) : 0;
+  })();
+  const piezasFinal = piezas || piezasNombre;
 
   const waButton = (
     <a
@@ -67,7 +72,7 @@ export default async function JuegoDetalle({
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-block rounded-full bg-brand-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
-              Juego · {piezas} piezas
+              {piezasFinal > 0 ? `Juego · ${piezasFinal} piezas` : "Juego"}
             </span>
             {j.refuerzo && (
               <span className="inline-block rounded-full bg-coral px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
@@ -126,7 +131,7 @@ export default async function JuegoDetalle({
               <div>
                 <p className="font-semibold text-navy">Código QR del juego</p>
                 <p className="text-sm text-slate-500">
-                  Escanéalo para realizar el pedido de este juego en el sistema de Aluminios A4.
+                  Escanéalo con POSGOLD para realizar el pedido de este juego en el sistema de Aluminios A4.
                 </p>
               </div>
             </div>

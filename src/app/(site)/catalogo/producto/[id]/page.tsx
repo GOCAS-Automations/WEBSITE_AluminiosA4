@@ -108,7 +108,7 @@ export default async function ProductoDetalle({
               <div>
                 <p className="font-semibold text-navy">Código QR del producto</p>
                 <p className="text-sm text-slate-500">
-                  Escanéalo para realizar el pedido de esta referencia en el sistema de Aluminios A4.
+                  Escanéalo con POSGOLD para realizar el pedido de esta referencia en el sistema de Aluminios A4.
                 </p>
               </div>
             </div>

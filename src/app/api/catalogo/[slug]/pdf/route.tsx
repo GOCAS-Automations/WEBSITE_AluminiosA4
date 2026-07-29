@@ -19,18 +19,29 @@ function detectarFormato(buf: Buffer): "png" | "jpg" | null {
   return null;
 }
 
+const TAMANO_MAX_IMAGEN = 3 * 1024 * 1024; // 3 MB
+
 /**
- * Descarga los QR antes de renderizar: así una URL caída o lenta no rompe
- * el PDF completo (la celda muestra "QR pendiente").
+ * Descarga un lote de imágenes (QRs o fotos de producto) antes de renderizar:
+ * así una URL caída, lenta o demasiado pesada no rompe el PDF completo (la
+ * celda muestra su estado "pendiente" correspondiente). Dedupe por URL.
  */
-async function descargarQRs(urls: string[]): Promise<Record<string, PDFImagen | null>> {
+async function descargarImagenes(
+  urls: string[],
+  opts: { limitarTamano?: boolean } = {}
+): Promise<Record<string, PDFImagen | null>> {
   const unicos = Array.from(new Set(urls.filter(Boolean)));
   const entradas = await Promise.all(
     unicos.map(async (url): Promise<[string, PDFImagen | null]> => {
       try {
         const res = await fetch(url, { signal: AbortSignal.timeout(8000), cache: "no-store" });
         if (!res.ok) return [url, null];
+        if (opts.limitarTamano) {
+          const len = res.headers.get("content-length");
+          if (len && Number(len) > TAMANO_MAX_IMAGEN) return [url, null];
+        }
         const buf = Buffer.from(await res.arrayBuffer());
+        if (opts.limitarTamano && buf.length > TAMANO_MAX_IMAGEN) return [url, null];
         const format = detectarFormato(buf);
         return format ? [url, { data: buf, format }] : [url, null];
       } catch {
@@ -69,9 +80,18 @@ export async function GET(
     getJuegosByCategoria(categoria.id),
   ]);
 
-  const qrImages = await descargarQRs([
-    ...productos.map((p) => p.qr_url ?? ""),
-    ...juegos.map((j) => j.qr_url ?? ""),
+  const [qrImages, productoImages] = await Promise.all([
+    descargarImagenes([
+      ...productos.map((p) => p.qr_url ?? ""),
+      ...juegos.map((j) => j.qr_url ?? ""),
+    ]),
+    descargarImagenes(
+      [
+        ...productos.map((p) => p.imagen_url ?? ""),
+        ...juegos.map((j) => j.imagen_url ?? ""),
+      ],
+      { limitarTamano: true }
+    ),
   ]);
 
   const fecha = new Date().toLocaleDateString("es-CO", {
@@ -88,6 +108,7 @@ export async function GET(
       fecha={fecha}
       logo={leerLogo()}
       qrImages={qrImages}
+      productoImages={productoImages}
     />
   );
 

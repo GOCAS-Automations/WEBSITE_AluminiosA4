@@ -173,9 +173,9 @@ Storage o pegando una URL externa (Cloudinary u otro host).
 ## Significado del QR
 
 Cada producto/juego puede tener un `qr_url` (imagen del código QR). Se comunica en el sitio así:
-escaneándolo, el cliente/vendedor **realiza el pedido de esa referencia en el sistema interno de
-Aluminios A4** — no es un enlace a la ficha del producto ni a una tienda externa. Ver el texto
-exacto en `src/app/(site)/catalogo/producto/[id]/page.tsx` y `ProductCard.tsx`.
+escaneándolo **con POSGOLD**, el cliente/vendedor **realiza el pedido de esa referencia en el
+sistema de Aluminios A4** — no es un enlace a la ficha del producto ni a una tienda externa. Ver
+el texto exacto en `src/app/(site)/catalogo/producto/[id]/page.tsx` y `ProductCard.tsx`.
 
 ## WhatsApp
 

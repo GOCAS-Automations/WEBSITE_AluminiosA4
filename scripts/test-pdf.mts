@@ -33,6 +33,12 @@ const QR_CANDIDATOS = [
   "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=A4-171",
 ];
 
+/** Fotos reales de artículo (Supabase Storage) — solo algunos productos/juegos las tienen. */
+const IMG_PRODUCTO =
+  "https://bapzisncyjsxaugdsmxl.supabase.co/storage/v1/object/public/catalogo/productos/olla-manija-14-rojo.png";
+const IMG_JUEGO =
+  "https://bapzisncyjsxaugdsmxl.supabase.co/storage/v1/object/public/catalogo/juegos/juego-olla-manija-rojo.png";
+
 /* ---------------- datos mock ---------------- */
 
 function productos(qr: string | null): PDFProducto[] {
@@ -50,6 +56,7 @@ function productos(qr: string | null): PDFProducto[] {
       precio: 128900,
       precio_empaque: 749900,
       qr_url: qr,
+      imagen_url: IMG_PRODUCTO,
       colores: [
         { nombre: "Natural", hex: "#D7DDE2" },
         { nombre: "Negro", hex: "#22323C" },
@@ -69,6 +76,7 @@ function productos(qr: string | null): PDFProducto[] {
       precio: 86500,
       precio_empaque: 986500,
       qr_url: qr,
+      imagen_url: IMG_PRODUCTO,
       colores: [
         { nombre: "Natural", hex: "#D7DDE2" },
         { nombre: "Turquesa", hex: "#32CCD8" },
@@ -87,6 +95,8 @@ function productos(qr: string | null): PDFProducto[] {
       precio: 54000,
       precio_empaque: null,
       qr_url: null,
+      // URL inválida a propósito: simula una foto cuya descarga falla → "Foto pendiente".
+      imagen_url: "https://ejemplo.invalido/foto-rota.png",
       colores: [],
     },
     {
@@ -138,6 +148,7 @@ function juegos(qr: string | null): PDFJuego[] {
       precio: 489000,
       precio_empaque: null,
       qr_url: qr,
+      imagen_url: IMG_JUEGO,
       colores: [
         { nombre: "Natural", hex: "#D7DDE2" },
         { nombre: "Negro", hex: "#22323C" },
@@ -206,6 +217,34 @@ async function bajarQR(): Promise<{ url: string; img: PDFImagen } | null> {
     }
   }
   return null;
+}
+
+/** Descarga un lote de fotos de producto (mismo mecanismo que route.tsx: dedupe, timeout, try/catch). */
+async function descargarImagenes(urls: string[]): Promise<Record<string, PDFImagen | null>> {
+  const unicos = Array.from(new Set(urls.filter(Boolean)));
+  const entradas = await Promise.all(
+    unicos.map(async (url): Promise<[string, PDFImagen | null]> => {
+      try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+        if (!res.ok) {
+          console.log(`  Foto ${res.status} — ${url}`);
+          return [url, null];
+        }
+        const buf = Buffer.from(await res.arrayBuffer());
+        const format = detectarFormato(buf);
+        if (!format) {
+          console.log(`  Foto con formato no soportado — ${url}`);
+          return [url, null];
+        }
+        console.log(`  Foto OK (${buf.length} bytes, ${format}) — ${url}`);
+        return [url, { data: buf, format }];
+      } catch (e) {
+        console.log(`  Foto falló: ${url} → ${(e as Error).message}`);
+        return [url, null];
+      }
+    })
+  );
+  return Object.fromEntries(entradas);
 }
 
 /* ---- PNG sintético (fallback sin red): patrón tipo QR, 200x200 RGB ---- */
@@ -309,6 +348,9 @@ async function main() {
     console.log("  Sin red para QR remoto → se usa un PNG sintético tipo QR (mismo camino de código: buffer → <Image>)");
   }
 
+  console.log("1b) Descargando fotos de producto reales (Supabase Storage)…");
+  const productoImages = await descargarImagenes([IMG_PRODUCTO, IMG_JUEGO]);
+
   // --- PDF principal: ruta de producción (QR pre-descargados) ---
   console.log("2) Render con QR pre-descargados (ruta de producción)…");
   const qrImages: Record<string, PDFImagen | null> = {
@@ -328,6 +370,7 @@ async function main() {
       fecha,
       logo,
       qrImages,
+      productoImages,
     })
   );
 
@@ -390,6 +433,7 @@ async function main() {
       fecha,
       logo,
       qrImages,
+      productoImages,
     })
   );
 

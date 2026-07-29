@@ -66,7 +66,7 @@ export default function ProductCard({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={producto.qr_url} alt={`QR ${producto.nombre}`} className="h-32 w-32 object-contain" />
             <span className="text-xs font-medium text-slate-500">
-              Escanea y realiza tu pedido en el sistema de Aluminios A4
+              Escanéalo con POSGOLD y realiza tu pedido en el sistema de Aluminios A4
             </span>
           </button>
         )}
@@ -157,7 +157,7 @@ export default function ProductCard({
         {/* Precio + acción */}
         <div
           className={cn(
-            "mt-4 flex items-end border-t border-slate-100 pt-3",
+            "mt-auto flex items-end border-t border-slate-100 pt-3",
             showPrice !== false ? "justify-between" : "justify-end"
           )}
         >

@@ -6,9 +6,7 @@ import {
   getProductosByCategoria,
   getJuegosByCategoria,
 } from "@/lib/data";
-import { cn } from "@/lib/format";
-import ProductCard from "@/components/catalog/ProductCard";
-import SetCard from "@/components/catalog/SetCard";
+import CatalogoFiltrado from "@/components/catalog/CatalogoFiltrado";
 
 export const dynamic = "force-dynamic";
 
@@ -41,10 +39,16 @@ export default async function CategoriaPage({
     getJuegosByCategoria(cat.id),
   ]);
 
-  const tabs = [
-    { key: "individuales", label: "Ollas individuales", count: productos.length },
-    { key: "juegos", label: "Juegos de ollas", count: juegos.length },
-  ] as const;
+  // Etiquetas de las pestañas según la categoría actual.
+  // "Calderos" → "Calderos individuales" / "Juegos de calderos"
+  // "Jarras y Jarros" → "Jarras y jarros individuales" / "Juegos de jarras y jarros"
+  const nom = cat.nombre;
+  const nomLower = nom.toLowerCase();
+  const nomTab = nom.trim().includes(" ")
+    ? nom.charAt(0).toUpperCase() + nomLower.slice(1)
+    : nom;
+  const labelIndividuales = `${nomTab} individuales`;
+  const labelJuegos = `Juegos de ${nomLower}`;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
@@ -88,50 +92,14 @@ export default async function CategoriaPage({
         </a>
       </div>
 
-      {/* Selector individuales / juegos */}
-      <div className="mt-8 inline-flex rounded-xl bg-slate-100 p-1">
-        {tabs.map((t) => (
-          <Link
-            key={t.key}
-            href={`/catalogo/${cat.slug}?tipo=${t.key}`}
-            scroll={false}
-            className={cn(
-              "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition",
-              tipo === t.key ? "bg-white text-navy shadow-sm" : "text-slate-500 hover:text-navy"
-            )}
-          >
-            {t.label}
-            <span
-              className={cn(
-                "rounded-full px-1.5 py-0.5 text-[10px] font-bold",
-                tipo === t.key ? "bg-brand-100 text-brand-700" : "bg-slate-200 text-slate-500"
-              )}
-            >
-              {t.count}
-            </span>
-          </Link>
-        ))}
-      </div>
-
-      {/* Grid */}
-      <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {tipo === "individuales"
-          ? productos.map((p) => <ProductCard key={p.id} producto={p} />)
-          : juegos.map((j) => <SetCard key={j.id} juego={j} />)}
-      </div>
-
-      {tipo === "individuales" && productos.length === 0 && (
-        <EmptyState texto="No hay ollas individuales en esta categoría todavía." />
-      )}
-      {tipo === "juegos" && juegos.length === 0 && (
-        <EmptyState texto="No hay juegos en esta categoría todavía." />
-      )}
+      <CatalogoFiltrado
+        productos={productos}
+        juegos={juegos}
+        tipo={tipo}
+        slug={cat.slug}
+        labelIndividuales={labelIndividuales}
+        labelJuegos={labelJuegos}
+      />
     </div>
-  );
-}
-
-function EmptyState({ texto }: { texto: string }) {
-  return (
-    <p className="mt-8 rounded-xl bg-slate-50 p-8 text-center text-slate-500">{texto}</p>
   );
 }

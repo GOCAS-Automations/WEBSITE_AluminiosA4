@@ -11,8 +11,8 @@ Repositorio: [github.com/GOCAS-Automations/WEBSITE_AluminiosA4](https://github.c
   **productos individuales** o **juegos de ollas** (con pestañas para elegir), con tarjetas de
   **cambio de color de tapa**, medidas, colores de manija, empaque + **precio por empaque**,
   precio por unidad y **código QR de pedido** por referencia, y sección de **ubicación con
-  mapa**. Escanear el QR permite realizar el pedido de esa referencia directamente en el sistema
-  interno de Aluminios A4.
+  mapa**. El QR se escanea con **POSGOLD** y permite realizar el pedido de esa referencia
+  directamente en el sistema de Aluminios A4.
 - **Catálogo en PDF por categoría**: botón "Descargar catálogo PDF" en cada categoría
   (`/api/catalogo/[slug]/pdf`) que genera **en vivo** un PDF con los productos y juegos de esa
   categoría (fotos, medidas, precios y QR) usando los datos cargados en ese momento — no es un
