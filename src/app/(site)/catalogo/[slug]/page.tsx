@@ -6,6 +6,7 @@ import {
   getProductosByCategoria,
   getJuegosByCategoria,
 } from "@/lib/data";
+import { getConfig } from "@/lib/config";
 import CatalogoFiltrado from "@/components/catalog/CatalogoFiltrado";
 
 export const dynamic = "force-dynamic";
@@ -34,9 +35,10 @@ export default async function CategoriaPage({
   const sp = await searchParams;
   const tipo = sp?.tipo === "juegos" ? "juegos" : "individuales";
 
-  const [productos, juegos] = await Promise.all([
+  const [productos, juegos, cfg] = await Promise.all([
     getProductosByCategoria(cat.id),
     getJuegosByCategoria(cat.id),
+    getConfig(),
   ]);
 
   // Etiquetas de las pestañas según la categoría actual.
@@ -99,6 +101,7 @@ export default async function CategoriaPage({
         slug={cat.slug}
         labelIndividuales={labelIndividuales}
         labelJuegos={labelJuegos}
+        waPhone={cfg.whatsapp_numero}
       />
     </div>
   );

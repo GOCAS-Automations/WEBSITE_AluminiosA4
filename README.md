@@ -8,11 +8,12 @@ Repositorio: [github.com/GOCAS-Automations/WEBSITE_AluminiosA4](https://github.c
 - **Sitio público**: landing de marca (sin precios, por decisión del cliente), catálogo con el
   inventario real de la empresa (**124 productos individuales + 19 juegos**) organizado por
   **6 categorías** (Ollas, Calderos, Pailas, Jarras y Jarros, Chocolateras, Complementos) →
-  **productos individuales** o **juegos de ollas** (con pestañas para elegir), con tarjetas de
-  **cambio de color de tapa**, medidas, colores de manija, empaque + **precio por empaque**,
-  precio por unidad y **código QR de pedido** por referencia, y sección de **ubicación con
-  mapa**. El QR se escanea con **POSGOLD** y permite realizar el pedido de esa referencia
-  directamente en el sistema de Aluminios A4.
+  **productos individuales** o **juegos de ollas** (con pestañas para elegir), con **filtros**
+  (búsqueda por nombre/referencia, precio, diámetro y color de tapa) y **orden siempre de menor a
+  mayor precio**, tarjetas de **cambio de color de tapa**, medidas, colores de manija, empaque +
+  **precio por empaque**, precio por unidad y **código QR de pedido** por referencia, y sección de
+  **ubicación con mapa**. El QR se escanea con **POSGOLD** y permite realizar el pedido de esa
+  referencia directamente en el sistema de Aluminios A4.
 - **Catálogo en PDF por categoría**: botón "Descargar catálogo PDF" en cada categoría
   (`/api/catalogo/[slug]/pdf`) que genera **en vivo** un PDF con los productos y juegos de esa
   categoría (fotos, medidas, precios y QR) usando los datos cargados en ese momento — no es un
@@ -24,9 +25,12 @@ Repositorio: [github.com/GOCAS-Automations/WEBSITE_AluminiosA4](https://github.c
   **placeholder con el logo de la empresa** en vez de un espacio vacío o imagen rota; el
   administrador sube las fotos definitivas después desde el panel.
 - **Panel de administración** (`/admin`): login por usuario (contraseñas con hash bcrypt + sesión
-  firmada), CRUD de **productos, juegos, categorías y usuarios**, con subida de imágenes a
-  **Supabase Storage** o por **URL** (Cloudinary compatible). Roles: **administrador** y **coordinador**
-  (el coordinador no tiene acceso a la gestión de usuarios).
+  firmada), CRUD de **productos, juegos, categorías y usuarios**, con **filtros en las listas**
+  (búsqueda por nombre/referencia, categoría y estado visible/oculto), subida de imágenes a
+  **Supabase Storage** o por **URL** (Cloudinary compatible), y una sección **Sitio web**
+  (`/admin/configuracion`) para editar contacto, dirección, portada del inicio y mostrar/ocultar
+  secciones de la página de inicio, con reflejo inmediato en el sitio público. Roles:
+  **administrador** (acceso total) y **coordinador** (catálogo y Sitio web, sin gestión de usuarios).
 
 ## Stack
 
@@ -58,12 +62,12 @@ npm run dev
 
 ### Cuentas de prueba
 
-| Usuario | Contraseña | Rol |
-|---|---|---|
-| `admin` | `admin123` | administrador |
-| `coordinador` | `coord123` | coordinador |
+`scripts/seed-usuarios.mjs` crea las cuentas de desarrollo `admin`/`admin123` y
+`coordinador`/`coord123`. Las contraseñas **definitivas** de entrega al cliente se generan y
+aplican con `scripts/actualizar-passwords.mjs` (ver más abajo) y no se guardan en este repo ni en
+este documento; se entregan directamente al cliente.
 
-> Cambia estas contraseñas desde **Admin → Usuarios** antes de producción.
+> Cambia las contraseñas desde **Admin → Usuarios** (solo rol administrador) cuando haga falta.
 
 ## Despliegue en Vercel
 
@@ -79,7 +83,12 @@ variables de entorno desde `.env.local`):
 
 - `scripts/apply-schema.mjs` — aplica `scripts/schema-gocas.sql` sobre Supabase vía conexión
   directa (requiere `SUPABASE_DB_URL`); útil para migraciones de esquema.
-- `scripts/seed-usuarios.mjs` — crea/actualiza los usuarios base del panel (`admin`, `coordinador`).
+- `scripts/seed-usuarios.mjs` — crea/actualiza los usuarios base del panel (`admin`, `coordinador`)
+  con las contraseñas de desarrollo.
+- `scripts/actualizar-passwords.mjs <passAdmin> <passCoord>` — genera el hash bcrypt de las
+  contraseñas recibidas por argumento y actualiza `password_hash` de `admin` y `coordinador`;
+  verifica el resultado releyendo los hashes y comparándolos con `bcrypt.compareSync`. No deja
+  contraseñas hardcodeadas en el repo — úsalo para fijar las contraseñas definitivas de entrega.
 - `scripts/load-referencias.mjs` — carga el catálogo real (CSV v2: categorías, productos, colores
   de tapa, juegos y su composición). Soporta `--dry` para solo parsear y reportar sin escribir.
 - `scripts/upload-seed.mjs <carpeta>` — sube imágenes de una carpeta local al bucket `catalogo`.
@@ -95,14 +104,15 @@ hace falta una recarga masiva (por ejemplo, una nueva versión del Excel de refe
 
 ## Documentación para el cliente
 
-Los siguientes documentos, en `web/docs/`, están pensados para entregar a Aluminios A4 (sin
-lenguaje técnico):
+Los siguientes documentos, en `web/docs/`, son HTML autocontenidos y brandeados (sin lenguaje
+técnico), listos para convertir a PDF y entregar a Aluminios A4:
 
-- [`docs/MANUAL_SITIO_WEB.md`](./docs/MANUAL_SITIO_WEB.md) — manual de uso del sitio público y
-  del panel de administración.
-- [`docs/NOTAS_IMPORTANTES.md`](./docs/NOTAS_IMPORTANTES.md) — inconsistencias e información
+- [`docs/MANUAL_SITIO_WEB.html`](./docs/MANUAL_SITIO_WEB.html) — manual de uso del sitio público
+  (incluye los filtros del catálogo y el orden por precio) y del panel de administración (incluye
+  las cuentas de acceso definitivas, los filtros de las listas y la sección **Sitio web**).
+- [`docs/NOTAS_IMPORTANTES.html`](./docs/NOTAS_IMPORTANTES.html) — inconsistencias e información
   relevante detectadas al cargar el catálogo real (artículos excluidos, referencias sin QR, QRs
-  sin referencia todavía, posibles erratas de medidas, etc.).
+  sin referencia todavía, posibles erratas de medidas, etc.) y las cuentas de acceso definitivas.
 
 ## Más documentación
 

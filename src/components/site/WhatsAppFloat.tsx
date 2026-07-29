@@ -1,9 +1,9 @@
-import { waLink, WA_MSG_GENERAL } from "@/lib/whatsapp";
+import { waLinkConfig, type SiteConfig } from "@/lib/config";
 
-export default function WhatsAppFloat() {
+export default function WhatsAppFloat({ cfg }: { cfg: SiteConfig }) {
   return (
     <a
-      href={waLink(WA_MSG_GENERAL)}
+      href={waLinkConfig(cfg)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Escríbenos por WhatsApp"

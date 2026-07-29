@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProductoById } from "@/lib/data";
 import { formatCOP, cm } from "@/lib/format";
-import { waLink } from "@/lib/whatsapp";
+import { getConfig, waLinkConfig } from "@/lib/config";
 import ColorViewer from "@/components/catalog/ColorViewer";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,7 @@ export default async function ProductoDetalle({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const p = await getProductoById(id);
+  const [p, cfg] = await Promise.all([getProductoById(id), getConfig()]);
   if (!p) notFound();
 
   const cat = (p as { categoria?: { nombre: string; slug: string } | null }).categoria ?? null;
@@ -44,7 +44,8 @@ export default async function ProductoDetalle({
 
   const waButton = (
     <a
-      href={waLink(
+      href={waLinkConfig(
+        cfg,
         `Hola, Aluminios A4 👋. Quisiera información sobre la referencia ${p.referencia ?? ""} — ${p.nombre}.`
       )}
       target="_blank"

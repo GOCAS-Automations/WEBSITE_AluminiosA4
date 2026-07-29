@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getJuegoById } from "@/lib/data";
 import { formatCOP, cm } from "@/lib/format";
-import { waLink } from "@/lib/whatsapp";
+import { getConfig, waLinkConfig } from "@/lib/config";
 import ColorViewer from "@/components/catalog/ColorViewer";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,7 @@ export default async function JuegoDetalle({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const j = await getJuegoById(id);
+  const [j, cfg] = await Promise.all([getJuegoById(id), getConfig()]);
   if (!j) notFound();
 
   const cat = (j as { categoria?: { nombre: string; slug: string } | null }).categoria ?? null;
@@ -37,7 +37,8 @@ export default async function JuegoDetalle({
 
   const waButton = (
     <a
-      href={waLink(
+      href={waLinkConfig(
+        cfg,
         `Hola, Aluminios A4 👋. Quisiera información sobre el juego ${j.referencia ?? ""} — ${j.nombre}.`
       )}
       target="_blank"

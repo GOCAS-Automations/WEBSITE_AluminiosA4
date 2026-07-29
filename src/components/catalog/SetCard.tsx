@@ -10,9 +10,12 @@ import ImageBox from "./ImageBox";
 export default function SetCard({
   juego,
   showPrice = true,
+  waPhone,
 }: {
   juego: JuegoConDetalle;
   showPrice?: boolean;
+  /** Número de WhatsApp desde la configuración del sitio. Si falta, usa el de @/lib/whatsapp. */
+  waPhone?: string;
 }) {
   const colores = juego.colores ?? [];
   const [idx, setIdx] = useState(0);
@@ -26,6 +29,11 @@ export default function SetCard({
     return m ? parseInt(m[1], 10) : 0;
   })();
   const piezasFinal = piezas || piezasNombre;
+
+  const waMensaje = `Hola, Aluminios A4 👋. Quisiera información sobre el juego ${juego.referencia ?? ""} — ${juego.nombre}.`;
+  const waHref = waPhone
+    ? `https://wa.me/${waPhone}?text=${encodeURIComponent(waMensaje)}`
+    : waLink(waMensaje);
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm ring-1 ring-brand-50 transition-all hover:-translate-y-0.5 hover:shadow-lg">
@@ -141,9 +149,7 @@ export default function SetCard({
           )}
           <div className="flex items-center gap-2">
             <a
-              href={waLink(
-                `Hola, Aluminios A4 👋. Quisiera información sobre el juego ${juego.referencia ?? ""} — ${juego.nombre}.`
-              )}
+              href={waHref}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Consultar por WhatsApp"

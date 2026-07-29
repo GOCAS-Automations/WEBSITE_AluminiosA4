@@ -251,3 +251,43 @@ create policy "public_read_catalogo" on storage.objects
 --
 -- select id, public, file_size_limit from storage.buckets where id = 'catalogo';
    =========================================================================== */
+
+
+/* ===========================================================================
+   6. configuracion — contenido editable del sitio público (una sola fila)
+   - Fila única forzada con `id boolean primary key default true check (id)`.
+   - Lectura pública (anon) para que el sitio la consuma con la key pública.
+   - Escritura solo service_role: panel /admin/configuracion (admin y coordinador).
+   =========================================================================== */
+
+create table if not exists public.configuracion (
+  id boolean primary key default true check (id),
+  telefono_contacto text not null default '+57 350 822 8479',
+  whatsapp_numero text not null default '573508228479',
+  whatsapp_mensaje text not null default 'Hola, Aluminios A4 👋. Quisiera solicitar información sobre sus productos.',
+  email_contacto text not null default 'ventas@aluminiosa4.com',
+  direccion_linea1 text not null default 'Cl. 36 #4-19, Comuna 4',
+  direccion_linea2 text not null default 'Cali, Valle del Cauca, Colombia',
+  maps_query text not null default 'Aluminios A4, Cl. 36 #4-19, Cali, Valle del Cauca',
+  hero_titulo text not null default '100% Aluminio de Calidad',
+  hero_subtitulo text not null default 'Fabricamos ollas, calderos y utensilios en aluminio resistente y duradero. Descubre nuestro catálogo de ollas individuales y juegos completos.',
+  hero_imagen_url text not null default '/hero-a4.png',
+  mostrar_franja_confianza boolean not null default true,
+  mostrar_destacados boolean not null default true,
+  mostrar_nosotros boolean not null default true,
+  mostrar_ubicacion boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
+drop trigger if exists set_updated_at on public.configuracion;
+create trigger set_updated_at before update on public.configuracion
+  for each row execute function public.set_updated_at();
+
+alter table public.configuracion enable row level security;
+
+drop policy if exists configuracion_select_publico on public.configuracion;
+create policy configuracion_select_publico on public.configuracion
+  for select to anon, authenticated using (true);
+
+-- Fila única inicial (no pisa la existente si ya fue editada desde el panel).
+insert into public.configuracion (id) values (true) on conflict (id) do nothing;

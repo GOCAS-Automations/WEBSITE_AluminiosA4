@@ -25,7 +25,7 @@ export async function getAllProductos() {
   const { data } = await db
     .from("productos")
     .select("*, categoria:categorias(nombre), colores:producto_colores(id)")
-    .order("orden");
+    .order("precio", { ascending: true });
   return data ?? [];
 }
 
@@ -47,7 +47,7 @@ export async function getProductosLite() {
   const { data } = await db
     .from("productos")
     .select("id, nombre, referencia, precio, categoria_id")
-    .order("orden");
+    .order("nombre", { ascending: true });
   return data ?? [];
 }
 
@@ -57,7 +57,7 @@ export async function getAllJuegos() {
   const { data } = await db
     .from("juegos")
     .select("*, categoria:categorias(nombre), componentes:juego_productos(producto_id)")
-    .order("orden");
+    .order("precio", { ascending: true });
   return data ?? [];
 }
 

@@ -9,17 +9,22 @@ calderos y utensilios de aluminio en Cali, Colombia.
 
 - **Sitio público**: landing de marca (**sin precios** en la sección de destacados — decisión del
   cliente; el catálogo y las fichas sí muestran precio), catálogo por **categorías** →
-  **productos individuales** o **juegos de ollas** (pestañas), tarjetas con cambio de color de
-  tapa, medidas/empaque/precio (+ precio de empaque) y QR de pedido, botón de **WhatsApp** por
-  referencia y flotante global, botón **"Descargar catálogo PDF"** por categoría (generado en
-  vivo), sección de ubicación con mapa.
+  **productos individuales** o **juegos de ollas** (pestañas), con **filtros** (búsqueda por
+  nombre/referencia, precio, diámetro, color de tapa) y **orden siempre de menor a mayor precio**
+  (catálogo web y PDF), tarjetas con cambio de color de tapa, medidas/empaque/precio (+ precio de
+  empaque) y QR de pedido, botón de **WhatsApp** por referencia y flotante global, botón
+  **"Descargar catálogo PDF"** por categoría (generado en vivo), sección de ubicación con mapa.
 - **Panel admin** (`/admin`): login propio (usuario + contraseña), CRUD de productos, juegos,
-  categorías y usuarios, subida de imágenes a Supabase Storage o por URL externa (Cloudinary
-  compatible). Roles `administrador` y `coordinador`.
+  categorías y usuarios con **filtros en las listas** (búsqueda, categoría, estado visible/oculto,
+  también ordenadas de menor a mayor precio), subida de imágenes a Supabase Storage o por URL
+  externa (Cloudinary compatible), y sección **Sitio web** (`/admin/configuracion`, administrador y
+  coordinador) para editar contacto, dirección, portada del inicio y mostrar/ocultar secciones de
+  la home, con reflejo inmediato en el sitio público. Roles `administrador` (acceso total) y
+  `coordinador` (catálogo y Sitio web, sin gestión de usuarios).
 
 Catálogo real cargado: **124 productos individuales + 19 juegos**, en 6 categorías (Pailas 36,
 Ollas 23, Calderos 22, Complementos 15, Jarras y Jarros 14, Chocolateras 14; juegos: Ollas 9,
-Calderos 7, Pailas 3). Ver `docs/NOTAS_IMPORTANTES.md` para inconsistencias del Excel de origen
+Calderos 7, Pailas 3). Ver `docs/NOTAS_IMPORTANTES.html` para inconsistencias del Excel de origen
 (artículos excluidos, referencias sin QR, QRs sin referencia, erratas de medidas, etc.).
 
 ## Stack
@@ -45,8 +50,10 @@ src/app/
     login/page.tsx
     actions.ts                # server action login()/logout()
     layout.tsx                # valida sesión vía middleware, no vía este layout
-    (panel)/                  # rutas protegidas: dashboard, productos, juegos, categorías, usuarios
-      productos/ juegos/ categorias/ usuarios/   # cada una: page.tsx (lista), nuevo/, [id]/, actions.ts, *Form.tsx
+    (panel)/                  # rutas protegidas: dashboard, productos, juegos, categorías, usuarios, configuracion
+      productos/ juegos/ categorias/ usuarios/   # cada una: page.tsx (lista con filtros), nuevo/, [id]/, actions.ts, *Form.tsx
+      configuracion/          # "Sitio web": editar contacto, dirección, portada del inicio y
+                               # mostrar/ocultar secciones de la home (admin y coordinador)
   api/
     upload/route.ts               # sube archivo a Supabase Storage (requiere sesión, límite 10 MB)
     catalogo/[slug]/pdf/route.tsx # genera EN VIVO el PDF de catálogo de una categoría (@react-pdf/renderer)
@@ -58,11 +65,16 @@ src/components/
   catalog/       ProductCard.tsx, SetCard.tsx, ImageBox.tsx (placeholder), ColorViewer.tsx
   admin/         AdminShell.tsx, FormBits.tsx, SubmitButton.tsx, ImageField.tsx,
                  ColoresEditor.tsx (colores de tapa por producto/juego),
-                 ComponentesEditor.tsx (composición de un juego a partir de productos)
+                 ComponentesEditor.tsx (composición de un juego a partir de productos),
+                 FiltrosBar.tsx (barra de filtros: búsqueda, categoría, estado),
+                 TablaProductos.tsx / TablaJuegos.tsx (listas filtrables de Productos/Juegos)
 
 src/lib/
   supabase.ts    # supabasePublic (anon, RLS) y supabaseAdmin() (service role, solo servidor)
   data.ts        # lecturas públicas del catálogo (usa supabasePublic)
+  config.ts      # SiteConfig: lee la tabla `configuracion` (contacto, dirección, portada del
+                 # inicio, mostrar/ocultar secciones); getConfig() cacheado por request, con
+                 # defaults si la fila no existe. Editable desde /admin/configuracion
   admin/data.ts  # lecturas para el panel (usa supabaseAdmin)
   admin/form.ts  # helpers de parseo de FormData (strOrNull, toNum, boolFrom, parseJsonArray)
   auth.ts        # getSession/requireSession/requireAdmin, hash/verify de contraseñas (bcryptjs)
@@ -76,7 +88,10 @@ src/lib/
 
 scripts/  (correr con: node --env-file=.env.local scripts/<nombre>.mjs, desde web/)
   apply-schema.mjs     # aplica scripts/schema-gocas.sql sobre Supabase vía SUPABASE_DB_URL (migraciones)
-  seed-usuarios.mjs    # crea/actualiza admin/coordinador
+  seed-usuarios.mjs    # crea/actualiza admin/coordinador con contraseñas de desarrollo
+  actualizar-passwords.mjs <passAdmin> <passCoord>  # fija contraseñas DEFINITIVAS: recibe las
+                        # contraseñas por argumento (nunca hardcodeadas), guarda su hash bcrypt en
+                        # `usuarios.password_hash` y verifica releyendo + bcrypt.compareSync
   load-referencias.mjs # carga el catálogo real (CSV v2); soporta --dry
   upload-seed.mjs [carpeta]  # sube imágenes de una carpeta local al bucket "catalogo"
   assign-qrs.mjs       # asigna a cada producto/juego su QR ya subido, según `referencia`
@@ -84,8 +99,10 @@ scripts/  (correr con: node --env-file=.env.local scripts/<nombre>.mjs, desde we
   test-pdf.mts         # smoke test del PDF con datos mock (correr con `npx tsx scripts/test-pdf.mts`)
 
 docs/
-  MANUAL_SITIO_WEB.md      # manual de uso (sitio público + panel) para entregar al cliente
-  NOTAS_IMPORTANTES.md     # inconsistencias/notas de la carga real del catálogo, para el cliente
+  MANUAL_SITIO_WEB.html      # manual de uso (sitio público + panel) — HTML brandeado, para
+                              # convertir a PDF y entregar al cliente
+  NOTAS_IMPORTANTES.html      # inconsistencias/notas de la carga real del catálogo — HTML
+                              # brandeado, para convertir a PDF y entregar al cliente
 ```
 
 No existe carpeta `src/app/(site)/admin` — la ruta admin vive en `src/app/admin`, separada del
@@ -102,6 +119,7 @@ npm run lint            # eslint
 # scripts puntuales (requieren variables de entorno; usar --env-file para cargarlas)
 node --env-file=.env.local scripts/apply-schema.mjs
 node --env-file=.env.local scripts/seed-usuarios.mjs
+node --env-file=.env.local scripts/actualizar-passwords.mjs <passAdmin> <passCoord>
 node --env-file=.env.local scripts/load-referencias.mjs --dry
 node --env-file=.env.local scripts/test-admin.mjs
 node scripts/upload-seed.mjs [carpeta-origen]
@@ -132,12 +150,18 @@ Tablas en Postgres (Supabase):
   (un juego se arma seleccionando productos individuales existentes).
 - **usuarios** — login propio: `usuario`, `password_hash` (bcrypt), `nombre`, `email`, `rol`
   (`administrador` | `coordinador`), `activo`, `last_login`.
+- **configuracion** — fila única (contenido editable del sitio público): contacto
+  (`telefono_contacto`, `whatsapp_numero`, `whatsapp_mensaje`, `email_contacto`), dirección
+  (`direccion_linea1/2`, `maps_query`), portada del inicio (`hero_titulo`, `hero_subtitulo`,
+  `hero_imagen_url`) y los interruptores `mostrar_franja_confianza` / `mostrar_destacados` /
+  `mostrar_nosotros` / `mostrar_ubicacion`. Lectura pública (anon) vía `src/lib/config.ts`;
+  escritura solo desde `/admin/configuracion` (administrador y coordinador).
 
 Los datos reales (**124 productos + 19 juegos**, CSV v2) se cargaron desde
 `insumos/REFERENCIAS ARTICULOS EXCEL ACTUALIZADO v2.csv` (carpeta hermana de `web/`, fuera del
 repo del sitio) mediante `scripts/load-referencias.mjs`; los QR por referencia se extrajeron de
 `insumos/QRs A4.pdf` y se subieron al bucket `catalogo`, carpeta `qr/`, con
-`scripts/assign-qrs.mjs`. Ver `docs/NOTAS_IMPORTANTES.md` para el detalle completo de
+`scripts/assign-qrs.mjs`. Ver `docs/NOTAS_IMPORTANTES.html` para el detalle completo de
 inconsistencias detectadas al cargar (artículos sin código, referencias sin QR, QRs sin
 referencia todavía, posibles erratas de medidas, etc.) — es el documento de referencia para no
 repetir ese análisis. Estos dos scripts se pueden volver a correr si llega una nueva versión del

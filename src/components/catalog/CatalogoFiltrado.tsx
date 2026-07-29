@@ -117,6 +117,7 @@ export default function CatalogoFiltrado({
   slug,
   labelIndividuales,
   labelJuegos,
+  waPhone,
 }: {
   productos: ProductoConColores[];
   juegos: JuegoConDetalle[];
@@ -124,6 +125,8 @@ export default function CatalogoFiltrado({
   slug: string;
   labelIndividuales: string;
   labelJuegos: string;
+  /** Número de WhatsApp desde la configuración del sitio; se pasa a las tarjetas. */
+  waPhone?: string;
 }) {
   const router = useRouter();
 
@@ -438,8 +441,10 @@ export default function CatalogoFiltrado({
       {/* Grid */}
       <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {esIndiv
-          ? productosFiltrados.map((p) => <ProductCard key={p.id} producto={p} />)
-          : juegosFiltrados.map((j) => <SetCard key={j.id} juego={j} />)}
+          ? productosFiltrados.map((p) => (
+              <ProductCard key={p.id} producto={p} waPhone={waPhone} />
+            ))
+          : juegosFiltrados.map((j) => <SetCard key={j.id} juego={j} waPhone={waPhone} />)}
       </div>
 
       {/* Vacíos */}

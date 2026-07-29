@@ -96,7 +96,7 @@ export async function getProductosByCategoria(
     .select(PROD_SELECT)
     .eq("categoria_id", categoriaId)
     .eq("activo", true)
-    .order("orden");
+    .order("precio", { ascending: true });
   return (data ?? []).map(normProducto);
 }
 
@@ -115,7 +115,7 @@ export async function getDestacadosProductos(limit = 4): Promise<ProductoConColo
     .select(PROD_SELECT)
     .eq("activo", true)
     .eq("destacado", true)
-    .order("orden")
+    .order("precio", { ascending: true })
     .limit(limit);
   return (data ?? []).map(normProducto);
 }
@@ -128,7 +128,7 @@ export async function getJuegosByCategoria(categoriaId: string): Promise<JuegoCo
     .select(JUEGO_SELECT)
     .eq("categoria_id", categoriaId)
     .eq("activo", true)
-    .order("orden");
+    .order("precio", { ascending: true });
   return (data ?? []).map(normJuego);
 }
 
@@ -147,7 +147,7 @@ export async function getDestacadosJuegos(limit = 3): Promise<JuegoConDetalle[]>
     .select(JUEGO_SELECT)
     .eq("activo", true)
     .eq("destacado", true)
-    .order("orden")
+    .order("precio", { ascending: true })
     .limit(limit);
   return (data ?? []).map(normJuego);
 }
