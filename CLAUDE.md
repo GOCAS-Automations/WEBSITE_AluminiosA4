@@ -17,10 +17,14 @@ calderos y utensilios de aluminio en Cali, Colombia.
 - **Panel admin** (`/admin`): login propio (usuario + contraseña), CRUD de productos, juegos,
   categorías y usuarios con **filtros en las listas** (búsqueda, categoría, estado visible/oculto,
   también ordenadas de menor a mayor precio), subida de imágenes a Supabase Storage o por URL
-  externa (Cloudinary compatible), y sección **Sitio web** (`/admin/configuracion`, administrador y
+  externa (Cloudinary compatible), sección **Sitio web** (`/admin/configuracion`, administrador y
   coordinador) para editar contacto, dirección, portada del inicio y mostrar/ocultar secciones de
-  la home, con reflejo inmediato en el sitio público. Roles `administrador` (acceso total) y
-  `coordinador` (catálogo y Sitio web, sin gestión de usuarios).
+  la home, con reflejo inmediato en el sitio público, y sección **Pines de catálogo**
+  (`/admin/pines`, administrador y coordinador) para administrar el acceso por PIN al catálogo
+  (ver `## Acceso al catálogo por PIN` más abajo). Roles `administrador` (acceso total) y
+  `coordinador` (catálogo, Sitio web y Pines de catálogo, sin gestión de usuarios).
+- El **catálogo** (`/catalogo*`) muestra precios de mayorista y no es público: queda protegido por
+  un PIN compartido (lightbox), no por cuentas de usuario — ver `## Acceso al catálogo por PIN`.
 
 Catálogo real cargado: **124 productos individuales + 19 juegos**, en 6 categorías (Pailas 36,
 Ollas 23, Calderos 22, Complementos 15, Jarras y Jarros 14, Chocolateras 14; juegos: Ollas 9,
@@ -46,18 +50,29 @@ src/app/
     catalogo/producto/[id]/page.tsx
     catalogo/juego/[id]/page.tsx
     layout.tsx                # Header + Footer + WhatsAppFloat del sitio
+  acceso-catalogo/
+    page.tsx, PinGate.tsx      # destino del rewrite del middleware cuando falta el PIN del catálogo;
+                               # lightbox con el input de PIN + botón "Solicitar un PIN" (WhatsApp)
   admin/
     login/page.tsx
     actions.ts                # server action login()/logout()
     layout.tsx                # valida sesión vía middleware, no vía este layout
-    (panel)/                  # rutas protegidas: dashboard, productos, juegos, categorías, usuarios, configuracion
+    (panel)/                  # rutas protegidas: dashboard, productos, juegos, categorías, usuarios,
+                               # configuracion, pines
       productos/ juegos/ categorias/ usuarios/   # cada una: page.tsx (lista con filtros), nuevo/, [id]/, actions.ts, *Form.tsx
       configuracion/          # "Sitio web": editar contacto, dirección, portada del inicio y
                                # mostrar/ocultar secciones de la home (admin y coordinador)
+      pines/                  # "Pines de catálogo": CRUD de catalogo_pines (admin y coordinador);
+                               # page.tsx (lista), nuevo/, [id]/, actions.ts, PinForm.tsx
   api/
     upload/route.ts               # sube archivo a Supabase Storage (requiere sesión, límite 10 MB)
     catalogo/[slug]/pdf/route.tsx # genera EN VIVO el PDF de catálogo de una categoría (@react-pdf/renderer)
-  middleware.ts                # protege /admin, restringe /admin/usuarios a administrador
+    catalogo/acceso/route.ts      # POST: canjea un PIN por la cookie a4_catalogo (única ruta de
+                                   # /api/catalogo/* que el middleware NUNCA bloquea)
+  middleware.ts                # protege /admin (redirige a /admin/login) y restringe /admin/usuarios
+                               # a administrador; protege /catalogo* + /api/catalogo/* (rewrite a
+                               # /acceso-catalogo si no hay PIN válido ni sesión de panel — ver
+                               # "Acceso al catálogo por PIN")
 
 src/components/
   Logo.tsx
@@ -78,7 +93,9 @@ src/lib/
   admin/data.ts  # lecturas para el panel (usa supabaseAdmin)
   admin/form.ts  # helpers de parseo de FormData (strOrNull, toNum, boolFrom, parseJsonArray)
   auth.ts        # getSession/requireSession/requireAdmin, hash/verify de contraseñas (bcryptjs)
-  session.ts     # firma/verifica el JWT de sesión (jose, HS256)
+  session.ts     # firma/verifica el JWT de sesión del panel (jose, HS256, cookie a4_session)
+  catalogo-acceso.ts # firma/verifica el JWT de acceso al catálogo (jose, HS256, cookie a4_catalogo,
+                     # 30 días) — usado por el middleware y por /api/catalogo/acceso
   upload-client.ts # uploadImage() del lado del cliente hacia /api/upload
   whatsapp.ts    # WHATSAPP_PHONE, waLink(mensaje), WA_MSG_GENERAL — usado por WhatsAppFloat,
                  # ProductCard/SetCard y las fichas de producto/juego
@@ -156,6 +173,12 @@ Tablas en Postgres (Supabase):
   `hero_imagen_url`) y los interruptores `mostrar_franja_confianza` / `mostrar_destacados` /
   `mostrar_nosotros` / `mostrar_ubicacion`. Lectura pública (anon) vía `src/lib/config.ts`;
   escritura solo desde `/admin/configuracion` (administrador y coordinador).
+- **catalogo_pines** — PINes de acceso al catálogo (precios de mayorista, no es público): `id`,
+  `pin` (texto, único), `etiqueta`, `notas`, `activo` (bool), `expira_at` (timestamptz opcional),
+  `usos` (contador), `ultimo_acceso` (timestamptz), `created_at`/`updated_at`. **RLS habilitado sin
+  políticas**: solo accesible con `supabaseAdmin()` (service role); nunca se expone al navegador.
+  Administrado desde `/admin/pines` (administrador y coordinador). Ver `## Acceso al catálogo por
+  PIN` para el detalle completo del flujo.
 
 Los datos reales (**124 productos + 19 juegos**, CSV v2) se cargaron desde
 `insumos/REFERENCIAS ARTICULOS EXCEL ACTUALIZADO v2.csv` (carpeta hermana de `web/`, fuera del
@@ -179,12 +202,51 @@ de muestra anterior); la asignación en la base de datos es correcta, no es un b
   usuario+contraseña contra la tabla `usuarios` (bcrypt vía `src/lib/auth.ts`) y firma una cookie
   JWT (`a4_session`, HS256, 7 días) con `jose` usando `SESSION_SECRET` (`src/lib/session.ts`).
 - `src/middleware.ts` protege todo `/admin/*`: sin sesión redirige a `/admin/login`; si el rol no
-  es `administrador`, bloquea `/admin/usuarios`.
+  es `administrador`, bloquea `/admin/usuarios`. El mismo middleware protege también `/catalogo*` y
+  `/api/catalogo/*` con un mecanismo independiente (PIN, no sesión) — ver `## Acceso al catálogo
+  por PIN`.
 - `requireSession()` / `requireAdmin()` (`src/lib/auth.ts`) se usan dentro de server actions y
   páginas del panel para reforzar la misma regla del lado del servidor.
 - Cliente `supabaseAdmin()` (service role) bypassa RLS y solo debe usarse en código de servidor
   (server actions, route handlers, scripts); `supabasePublic` (anon) es de solo lectura para el
   catálogo público.
+
+## Acceso al catálogo por PIN
+
+El catálogo (`/catalogo*`) muestra precios de mayorista y no es público: queda protegido por un PIN
+compartido (no por una cuenta de usuario). Piezas involucradas:
+
+- **Tabla `catalogo_pines`** (ver Modelo de datos): `pin`, `etiqueta`, `notas`, `activo`,
+  `expira_at`, `usos`, `ultimo_acceso`. RLS **sin políticas** — solo accesible vía `supabaseAdmin()`.
+- **Cookie `a4_catalogo`** (`src/lib/catalogo-acceso.ts`): JWT firmado con `jose` (HS256) usando
+  `SESSION_SECRET` (mismo secreto que la cookie de sesión del panel, pero cookie independiente),
+  con **30 días** de vigencia (`CATALOGO_MAX_AGE`). El `sub` del token es el `id` del PIN canjeado;
+  el token no lleva el PIN en claro.
+- **`src/middleware.ts`**: para `pathname === "/catalogo"`, `/catalogo/*` o `/api/catalogo/*`,
+  exige sesión de panel válida **o** cookie `a4_catalogo` válida. Si falta, hace **rewrite** (no
+  redirect) a `/acceso-catalogo?next=<ruta original>` en rutas de página — la URL visible no
+  cambia y la página protegida nunca llega a renderizarse en el cliente — o responde `401 JSON` si
+  la ruta es de `/api/catalogo/*`. La excepción explícita es `POST /api/catalogo/acceso`: nunca se
+  bloquea, porque es el propio endpoint que canjea el PIN (si se bloqueara, nadie podría entrar).
+  `/acceso-catalogo` queda deliberadamente fuera del `matcher` para no generar un bucle de rewrites.
+- **`POST /api/catalogo/acceso`** (`src/app/api/catalogo/acceso/route.ts`): recibe `{ pin }`, trae
+  de Supabase los PINes con `activo = true` y compara el PIN recibido contra cada uno **en
+  JavaScript** (`.trim().toLowerCase() ===`), descartando además los que ya expiraron
+  (`expira_at` en el pasado). Si hay match, firma y setea la cookie `a4_catalogo` y actualiza
+  `usos`/`ultimo_acceso`; si no, responde 401 genérico tras un retardo fijo de ~500 ms (freno anti
+  fuerza bruta). **Nota técnica importante**: la comparación es exacta y en servidor — nunca usar
+  `.ilike()` de Supabase/PostgREST aquí. PostgREST traduce `*` a `%` y en SQL `LIKE`/`ILIKE` tanto
+  `%` como `_` son comodines; si el PIN contiene `_` o `*` (como ocurre con el PIN inicial de
+  entrega), un `.ilike()` haría match con PINes que no son ese, abriendo un bypass.
+- **`/admin/pines`** (administrador y coordinador): CRUD de `catalogo_pines` desde el panel —
+  crear (con botón que genera un PIN aleatorio fácil de dictar), editar, eliminar, y ver estado/uso
+  de cada uno. La UI advierte si no queda ningún PIN activo.
+- La **sesión del panel exime del PIN**: si `verifySession()` resuelve una sesión válida, el
+  middleware deja pasar sin comprobar `a4_catalogo`.
+
+**Importante para cambios futuros**: cualquier ruta nueva que exponga precios o datos del catálogo
+(otra vista, otro endpoint) debe agregarse al `matcher` de `src/middleware.ts`; si no, queda
+pública sin PIN.
 
 ## Política de imágenes y placeholder
 

@@ -162,7 +162,30 @@
     (Parte B, sección 5), sin tocar código.
   </div>
 
-  <h2><span class="num">2.</span> Catálogo</h2>
+  <h2><span class="num">2.</span> Acceso al catálogo (PIN)</h2>
+  <p>El catálogo muestra precios de mayorista, así que <strong>no es público</strong>: para verlo hace
+  falta un <strong>PIN de acceso</strong>.</p>
+  <ul>
+    <li>Al entrar a <span class="mono">/catalogo</span> o a cualquier página dentro del catálogo (una
+      categoría, la ficha de un producto o de un juego, o un enlace directo que alguien comparta),
+      aparece una ventana con el estilo del sitio que pide el <strong>PIN</strong>. La dirección del
+      navegador no cambia y el contenido no se carga hasta validar el PIN, así que los precios nunca
+      quedan expuestos.</li>
+    <li>Al ingresar un PIN válido, el acceso queda <strong>recordado en ese dispositivo durante 30
+      días</strong>; después de ese plazo vuelve a pedirlo.</li>
+    <li>La ventana incluye un botón <strong>"Solicitar un PIN"</strong> que abre WhatsApp con un
+      mensaje ya escrito, para quien llegue sin PIN.</li>
+    <li>La <strong>descarga del catálogo en PDF</strong> (punto 9) también está protegida: sin un PIN
+      válido no se puede descargar, aunque se tenga el enlace directo.</li>
+    <li>El equipo de Aluminios A4 que ya inició sesión en el panel <strong>entra directo al catálogo,
+      sin que le pida el PIN</strong>.</li>
+  </ul>
+  <div class="nota">
+    Los PIN se crean y administran desde el panel, en <strong>Pines de catálogo</strong> (ver Parte B,
+    sección 6).
+  </div>
+
+  <h2><span class="num">3.</span> Catálogo</h2>
   <p>Desde <em>Catálogo</em> (<span class="mono">/catalogo</span>) se ve el listado de las 6
   categorías. Al entrar a una categoría (por ejemplo <em>Ollas</em>) se ve:</p>
   <ul>
@@ -184,7 +207,7 @@
       siempre de menor a mayor precio</strong>.</li>
   </ul>
 
-  <h2><span class="num">3.</span> Tarjeta de producto (catálogo)</h2>
+  <h2><span class="num">4.</span> Tarjeta de producto (catálogo)</h2>
   <p>Cada tarjeta de una olla individual muestra:</p>
   <ul>
     <li><strong>Foto</strong> del producto. Si todavía no se ha cargado una foto real, se muestra
@@ -206,7 +229,7 @@
     <li>Un botón <strong>"Ver detalle"</strong> que lleva a la ficha completa del producto.</li>
   </ul>
 
-  <h2><span class="num">4.</span> Tarjeta de juego (catálogo)</h2>
+  <h2><span class="num">5.</span> Tarjeta de juego (catálogo)</h2>
   <p>Igual que la tarjeta de producto, pero además:</p>
   <ul>
     <li>Una etiqueta <strong>"Juego · N piezas"</strong> con el total de piezas que trae el juego.</li>
@@ -216,7 +239,7 @@
       separado.</li>
   </ul>
 
-  <h2><span class="num">5.</span> Ficha de producto</h2>
+  <h2><span class="num">6.</span> Ficha de producto</h2>
   <ul>
     <li>Selector de color de tapa en tamaño grande (misma lógica: si el color tiene foto propia, se
       muestra esa foto).</li>
@@ -228,18 +251,18 @@
     <li>Enlace para volver al catálogo.</li>
   </ul>
 
-  <h2><span class="num">6.</span> Ficha de juego</h2>
+  <h2><span class="num">7.</span> Ficha de juego</h2>
   <p>Igual que la ficha de producto, pero además incluye la sección <strong>"Este juego incluye"</strong>:
   la lista completa de las ollas que forman el juego, cada una con su cantidad, medidas y precio
   individual, con enlace a la ficha de esa olla específica.</p>
 
-  <h2><span class="num">7.</span> Cómo funciona el QR (importante)</h2>
+  <h2><span class="num">8.</span> Cómo funciona el QR (importante)</h2>
   <p>En todo el sitio (tarjetas, fichas y catálogo en PDF) el código QR <strong>no</strong> es un
   enlace a la ficha del producto ni a una tienda en línea: se <strong>escanea con el sistema
   POSGOLD</strong>, y eso permite <strong>realizar el pedido de esa referencia directamente en el
   sistema de Aluminios A4</strong>. Es la misma explicación en todos los lugares donde aparece el QR.</p>
 
-  <h2><span class="num">8.</span> Botón "Descargar catálogo PDF"</h2>
+  <h2><span class="num">9.</span> Botón "Descargar catálogo PDF"</h2>
   <p>Disponible en cada categoría del catálogo. Al pulsarlo:</p>
   <ul>
     <li>Se genera un PDF <strong>en vivo</strong>, en el momento, con el inventario y los precios
@@ -248,6 +271,8 @@
       <strong>QR de cada referencia</strong> (si una referencia no tiene QR, el PDF muestra "QR
       pendiente" en su lugar en vez de romper la descarga).</li>
     <li>El archivo se descarga con un nombre como <span class="mono">catalogo-ollas-aluminios-a4.pdf</span>.</li>
+    <li>Igual que el catálogo en el sitio, la descarga <strong>requiere un PIN válido</strong> (ver
+      punto 2): sin PIN no se genera el archivo, aunque se tenga el enlace directo.</li>
   </ul>
 
   <!-- ============================= PARTE B ============================= -->
@@ -284,6 +309,14 @@
       </tr>
     </tbody>
   </table>
+  <div class="nota">
+    <strong>PIN inicial del catálogo:</strong> <span class="mono">aluminiosA4_mayorista*</span> (no
+    distingue mayúsculas de minúsculas). Este PIN es <strong>distinto de las cuentas de arriba</strong>:
+    no sirve para entrar al panel, solo para ver el catálogo de precios de mayorista en el sitio
+    público (ver Parte A, sección 2). Se puede cambiar o reemplazar por PINes propios desde
+    <strong>Pines de catálogo</strong> (sección 6 de esta parte) — se recomienda hacerlo al recibir
+    el sitio.
+  </div>
   <div class="aviso">
     <div class="titulo">Recomendación de seguridad</div>
     Guarda estas contraseñas en un lugar seguro y <strong>cámbialas periódicamente</strong> desde
@@ -334,7 +367,53 @@
     frase de la portada, ocultar temporalmente una sección del inicio) se hace desde aquí.
   </div>
 
-  <h2><span class="num">6.</span> Productos — crear, editar y eliminar</h2>
+  <h2><span class="num">6.</span> Pines de catálogo</h2>
+  <p>En <strong>Pines de catálogo</strong> (<span class="mono">/admin/pines</span>) — visible tanto
+  para <span class="badge badge-admin">Administrador</span> como para
+  <span class="badge badge-coord">Coordinador</span> — se administra quién puede ver el catálogo (ver
+  Parte A, sección 2). La lista muestra, por cada PIN: el PIN, su <strong>etiqueta</strong>, el
+  <strong>estado</strong> (activo/inactivo/expirado), cuántas veces se ha usado y la fecha del
+  <strong>último acceso</strong>.</p>
+  <p>Al crear un PIN nuevo (botón <strong>"Generar"</strong> propone uno aleatorio fácil de dictar) o
+  editar uno existente, los campos son:</p>
+  <table>
+    <thead><tr><th>Campo</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>PIN</strong></td>
+        <td>El código que se comparte con el cliente o vendedor. Entre 4 y 32 caracteres; no
+          distingue mayúsculas de minúsculas.</td>
+      </tr>
+      <tr>
+        <td><strong>Etiqueta</strong></td>
+        <td>¿Para quién es este PIN? Por ejemplo "Distribuidor Norte" o "Feria de Cali".</td>
+      </tr>
+      <tr>
+        <td><strong>Notas</strong></td>
+        <td>Comentario interno, opcional.</td>
+      </tr>
+      <tr>
+        <td><strong>Activo</strong></td>
+        <td>Interruptor: si se apaga, ese PIN deja de funcionar de inmediato (sin borrarlo).</td>
+      </tr>
+      <tr>
+        <td><strong>Expira el</strong></td>
+        <td>Fecha opcional a partir de la cual el PIN deja de servir. Vacío = no expira.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="nota">
+    Entregar un <strong>PIN distinto por cliente o campaña</strong> permite saber cuál se está usando
+    y, si hace falta, <strong>revocar solo ese</strong> (desactivándolo o eliminándolo) sin afectar a
+    los demás.
+  </div>
+  <div class="aviso">
+    <div class="titulo">Importante</div>
+    Si no queda <strong>ningún PIN activo</strong>, nadie podrá ver el catálogo. El panel muestra un
+    aviso en esta misma pantalla cuando eso ocurre.
+  </div>
+
+  <h2><span class="num">7.</span> Productos — crear, editar y eliminar</h2>
   <p>En <strong>Productos</strong> se ve la lista de todas las ollas individuales, con una barra de
   <strong>filtros</strong> arriba de la tabla: <strong>búsqueda</strong> por nombre o referencia,
   <strong>categoría</strong> y <strong>estado</strong> (visible/oculto) — junto con el contador
@@ -358,7 +437,7 @@
   editando, un botón <strong>"Eliminar"</strong> con confirmación (la eliminación no se puede
   deshacer).</p>
 
-  <h2><span class="num">7.</span> Juegos — crear, editar y eliminar</h2>
+  <h2><span class="num">8.</span> Juegos — crear, editar y eliminar</h2>
   <p>La lista de <strong>Juegos de ollas</strong> tiene la misma barra de filtros (búsqueda, categoría,
   estado) que Productos. Al crear/editar un juego, igual que productos, con dos diferencias
   importantes:</p>
@@ -373,18 +452,18 @@
       (solo se borra el juego como agrupación).</li>
   </ul>
 
-  <h2><span class="num">8.</span> Categorías</h2>
+  <h2><span class="num">9.</span> Categorías</h2>
   <p>En <strong>Categorías</strong> se administran las 6 categorías del catálogo (Ollas, Calderos,
   Pailas, Jarras y Jarros, Chocolateras, Complementos), cada una con nombre, <strong>slug</strong>
   (la parte de la dirección web, se genera automáticamente a partir del nombre pero se puede
   ajustar), descripción, imagen opcional, visibilidad y orden.</p>
 
-  <h2><span class="num">9.</span> Usuarios (solo administrador)</h2>
+  <h2><span class="num">10.</span> Usuarios (solo administrador)</h2>
   <p>Permite crear, editar y eliminar cuentas de acceso al panel: usuario (para iniciar sesión),
   nombre completo, correo (opcional), contraseña, rol (administrador/coordinador) y si la cuenta
   está activa. Un usuario no puede cambiar su propio rol ni eliminar su propia cuenta desde aquí.</p>
 
-  <h2><span class="num">10.</span> Consejos prácticos sobre las fotos</h2>
+  <h2><span class="num">11.</span> Consejos prácticos sobre las fotos</h2>
   <ul>
     <li>Tamaño recomendado: fotos <strong>cuadradas</strong>, con <strong>fondo claro o
       transparente</strong>, para que se vean bien tanto en las tarjetas como en el PDF del catálogo.</li>

@@ -14,10 +14,14 @@ Repositorio: [github.com/GOCAS-Automations/WEBSITE_AluminiosA4](https://github.c
   **precio por empaque**, precio por unidad y **código QR de pedido** por referencia, y sección de
   **ubicación con mapa**. El QR se escanea con **POSGOLD** y permite realizar el pedido de esa
   referencia directamente en el sistema de Aluminios A4.
+- **Catálogo protegido por PIN**: como muestra precios de mayorista, `/catalogo*` y `/api/catalogo/*`
+  quedan detrás de un lightbox que pide un **PIN** (tabla `catalogo_pines`, cookie firmada
+  `a4_catalogo` de **30 días**). La sesión del panel exime del PIN. Administración completa en
+  `/admin/pines` (administrador y coordinador). Detalle técnico completo en [`CLAUDE.md`](./CLAUDE.md).
 - **Catálogo en PDF por categoría**: botón "Descargar catálogo PDF" en cada categoría
   (`/api/catalogo/[slug]/pdf`) que genera **en vivo** un PDF con los productos y juegos de esa
   categoría (fotos, medidas, precios y QR) usando los datos cargados en ese momento — no es un
-  archivo fijo.
+  archivo fijo. También exige PIN, igual que el resto del catálogo.
 - **WhatsApp**: botón flotante global (mensaje general) en todo el sitio público, más un botón
   por referencia en cada tarjeta/ficha de producto y juego con un mensaje prellenado que incluye
   el código de referencia (`src/lib/whatsapp.ts`). Número: **350 822 8479**.
@@ -29,8 +33,10 @@ Repositorio: [github.com/GOCAS-Automations/WEBSITE_AluminiosA4](https://github.c
   (búsqueda por nombre/referencia, categoría y estado visible/oculto), subida de imágenes a
   **Supabase Storage** o por **URL** (Cloudinary compatible), y una sección **Sitio web**
   (`/admin/configuracion`) para editar contacto, dirección, portada del inicio y mostrar/ocultar
-  secciones de la página de inicio, con reflejo inmediato en el sitio público. Roles:
-  **administrador** (acceso total) y **coordinador** (catálogo y Sitio web, sin gestión de usuarios).
+  secciones de la página de inicio, con reflejo inmediato en el sitio público, y una sección
+  **Pines de catálogo** (`/admin/pines`) para crear, editar y revocar los PIN de acceso al catálogo.
+  Roles: **administrador** (acceso total) y **coordinador** (catálogo, Sitio web y Pines de
+  catálogo, sin gestión de usuarios).
 
 ## Stack
 
@@ -48,7 +54,7 @@ público `catalogo`.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Publishable/anon key (lectura pública del catálogo) |
 | `NEXT_PUBLIC_SUPABASE_BUCKET` | Bucket de imágenes (por defecto `catalogo`) |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Secreta.** Solo servidor: login, CRUD y subida de imágenes |
-| `SESSION_SECRET` | Secreto para firmar la cookie de sesión |
+| `SESSION_SECRET` | Secreto para firmar la cookie de sesión del panel (`a4_session`) y la cookie de acceso al catálogo por PIN (`a4_catalogo`) |
 | `NEXT_PUBLIC_SITE_URL` | URL pública del sitio (para QR/enlaces) |
 | `SUPABASE_DB_URL` | **Secreta.** Solo para `scripts/apply-schema.mjs` (migraciones de esquema vía conexión directa/session pooler). La app en runtime **no** la usa. |
 

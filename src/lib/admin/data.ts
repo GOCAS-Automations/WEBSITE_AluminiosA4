@@ -88,6 +88,22 @@ export async function getCategoriaAdmin(id: string): Promise<Categoria | null> {
   return (data as Categoria) ?? null;
 }
 
+/* -------- PINes de catálogo -------- */
+export async function getAllPines() {
+  const db = supabaseAdmin();
+  const { data } = await db
+    .from("catalogo_pines")
+    .select("*")
+    .order("created_at", { ascending: false });
+  return data ?? [];
+}
+
+export async function getPinAdmin(id: string) {
+  const db = supabaseAdmin();
+  const { data } = await db.from("catalogo_pines").select("*").eq("id", id).maybeSingle();
+  return data;
+}
+
 /* -------- Usuarios -------- */
 export async function getAllUsuarios(): Promise<Usuario[]> {
   const db = supabaseAdmin();

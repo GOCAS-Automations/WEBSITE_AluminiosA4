@@ -291,3 +291,39 @@ create policy configuracion_select_publico on public.configuracion
 
 -- Fila única inicial (no pisa la existente si ya fue editada desde el panel).
 insert into public.configuracion (id) values (true) on conflict (id) do nothing;
+
+
+/* ===========================================================================
+   7. catalogo_pines — PINes de acceso al catálogo (precios de mayorista)
+   - El catálogo muestra precios de mayorista: no puede ser público.
+   - El middleware exige una cookie firmada que se obtiene canjeando un PIN
+     en /api/catalogo/acceso.
+   - SIN políticas RLS: solo accesible con service_role. Los PINes nunca se
+     exponen al navegador ni a la key pública (anon).
+   - Se administran desde el panel en /admin/pines (admin y coordinador).
+   =========================================================================== */
+
+create table if not exists public.catalogo_pines (
+  id uuid primary key default gen_random_uuid(),
+  pin text not null unique,
+  etiqueta text,
+  notas text,
+  activo boolean not null default true,
+  expira_at timestamptz,
+  ultimo_acceso timestamptz,
+  usos integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+drop trigger if exists set_updated_at on public.catalogo_pines;
+create trigger set_updated_at before update on public.catalogo_pines
+  for each row execute function public.set_updated_at();
+
+alter table public.catalogo_pines enable row level security;
+-- SIN políticas: solo accesible con service role (los PINes nunca se exponen al navegador)
+
+-- PIN semilla de entrega (no pisa cambios hechos desde el panel).
+insert into public.catalogo_pines (pin, etiqueta, notas)
+values ('aluminiosA4_mayorista*', 'PIN general', 'PIN inicial de entrega; Aluminios A4 puede cambiarlo o crear otros desde el panel.')
+on conflict (pin) do nothing;

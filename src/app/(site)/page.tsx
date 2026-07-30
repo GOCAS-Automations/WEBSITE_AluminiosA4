@@ -172,17 +172,20 @@ export default async function LandingPage() {
                 Explorar el catálogo
               </Link>
             </div>
-            <div className="rounded-3xl a4-waves p-8">
-              <div className="grid grid-cols-2 gap-4 text-center text-white">
+            <div className="rounded-3xl a4-waves p-5 sm:p-8">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center text-white">
                 {[
                   { n: "100%", l: "Aluminio" },
                   { n: "+5", l: "Líneas de producto" },
-                  { n: "🇨🇴", l: "Hecho en Colombia" },
-                  { n: "★★★★★", l: "Calidad garantizada" },
+                  { n: "CO", l: "Hecho en Colombia", nClass: "text-xl sm:text-2xl" },
+                  { n: "★★★★★", l: "Calidad garantizada", nClass: "text-sm sm:text-2xl tracking-tight" },
                 ].map((s) => (
-                  <div key={s.l} className="rounded-2xl bg-white/10 p-5 ring-1 ring-white/20">
-                    <p className="text-2xl font-extrabold">{s.n}</p>
-                    <p className="text-xs text-white/85">{s.l}</p>
+                  <div
+                    key={s.l}
+                    className="flex min-w-0 flex-col items-center justify-center rounded-2xl bg-white/10 p-3 sm:p-5 ring-1 ring-white/20"
+                  >
+                    <p className={`text-xl sm:text-2xl font-extrabold leading-tight ${s.nClass ?? ""}`}>{s.n}</p>
+                    <p className="mt-0.5 break-words text-[11px] leading-snug text-white/85 sm:text-xs">{s.l}</p>
                   </div>
                 ))}
               </div>
