@@ -40,12 +40,11 @@ export default function PinGate({ next, waHref }: { next: string; waHref: string
         inputMode="text"
         autoFocus
         autoComplete="off"
-        autoCapitalize="characters"
         spellCheck={false}
         maxLength={64}
-        placeholder="PIN"
+        placeholder="Ingresa tu PIN"
         aria-label="PIN de acceso"
-        className="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-center text-lg font-bold uppercase tracking-[0.3em] outline-none placeholder:font-medium placeholder:tracking-normal placeholder:text-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+        className="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-center text-sm sm:text-base font-semibold outline-none placeholder:font-medium placeholder:text-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
       />
 
       {error && (
